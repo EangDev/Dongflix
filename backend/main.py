@@ -115,16 +115,15 @@ async def get_video(slug: str):
 
 
 @app.get("/anime")
-async def anime(page: Optional[int] = Query(None, description="Page number")):
+async def anime(page: Optional[int] = Query(1, description="Page number")):
     """
     Show list of anime
     return: JSON
     """
     try:
-        params = {"page": page} if page else {}
-        return main.anime(params=params)
+        # Pass page directly as a keyword argument
+        return main.anime(page=page)
     except Exception as err:
         raise HTTPException(status_code=500, detail=str(err))
-
 
 # Run with: uvicorn main:app --reload
