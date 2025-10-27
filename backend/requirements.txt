@@ -1,0 +1,19 @@
+api
+
+# FastAPI web framework
+fastapi
+
+# ASGI server to run FastAPI
+uvicorn
+
+# HTTP requests
+requests
+
+# HTML parsing
+beautifulsoup4
+
+# Load environment variables from .env
+python-dotenv
+
+# Optional: For type hints
+typing-extensions
