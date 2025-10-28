@@ -24,7 +24,7 @@ function HomePage() {
         <div className="search-box">
           <input type="text" className="search" placeholder="Search..."/>
           <button id="btn-search">
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="Magnifying" color="white" size="3px"/>
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="Magnifying"/>
           </button>
         </div>
         <div className="menu-text">
@@ -51,9 +51,16 @@ function HomePage() {
             </li>
             <li className="fixing-request">
               <FontAwesomeIcon icon={faEnvelope} color="white" size="2px"/>
-              <a href="#">Request Drama</a>
+              <a href="#">Sign in</a>
             </li>
           </ul>
+        </div>
+      </div>
+      <div className="container-1">
+        <div className="animated-text">
+          <div className="animation-txt">Welcome to DongFlix ^_____^ where worlds collide and legends rise!
+          Watch (●'◡'●)💕Renegade Immortal, 💀Perfect World, 🤩Battle Through the Heavens, etc.
+          Sit back🍜 relax🥱😴 and enjoy your Donghua adventure!⚔️</div>
         </div>
       </div>
     </header>

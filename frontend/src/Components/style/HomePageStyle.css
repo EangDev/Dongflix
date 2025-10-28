@@ -6,6 +6,8 @@
     --txt-color: #ccc;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 body{
     margin: 0;
     box-sizing: border-box;
@@ -55,10 +57,14 @@ body{
     background: var(--bg-hoverBG);
     cursor: pointer;
 }
+#btn-search:active{
+    background: var(--bg-activeBG);
+}
+
 .Magnifying{
-    color: var(--txt-color);
-    size: 3px;
-    padding: 10px;
+    color: white;
+    font-size: 14px;
+    padding: 12px;
 }
 .menu-text{
     display: flex;
@@ -114,4 +120,37 @@ body{
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
+}
+.container-1{
+    position: relative;
+    width: 100%;
+    min-height: 35px;
+    background-color: var(--bg-hoverBG);
+    overflow: hidden;
+}
+
+.animated-text{
+    display: flex;
+    height: 30px;
+    align-items: center;
+    white-space: nowrap;
+}
+.animation-txt{
+    position: absolute;
+    right: 0;
+    color: var(--txt-color);
+    font-size: 20px;
+    font-family: 'Space Mono', sans-serif;
+    font-weight: bold;
+    animation: move 40s linear infinite;
+}
+
+/*Key frame for looping the text*/
+@keyframes move{
+    from {
+    transform: translateX(100%); 
+  }
+  to {
+    transform: translateX(-60%);
+  }
 }
