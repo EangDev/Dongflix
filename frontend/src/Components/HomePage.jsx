@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faUser, faMagnifyingGlass, faHouse,   
-faComments, faBook, faEnvelope
+faComments, faBook, faEnvelope,
+faScroll
 } from "@fortawesome/free-solid-svg-icons";
 import './style/HomePageStyle.css';
 import logo from '../Assets/mylogo.png';
+import BannerPage from '../Components/BannerPage';
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,28 +32,28 @@ function HomePage() {
         <div className="menu-text">
           <ul>
             <li>
-              <FontAwesomeIcon icon={faHouse} color="white" size="2px"/>
+              <FontAwesomeIcon icon={faHouse} color="#ccc" size="2px"/>
               <a href="#">Home</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faUser} color="white" size="2px"/>
+              <FontAwesomeIcon icon={faScroll} color="#ccc" size="2px"/>
               <a href="#">About Us</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faComment} color="white" size="2px"/>
+              <FontAwesomeIcon icon={faComment} color="#ccc" size="2px"/>
               <a href="#">Contact Us</a>
             </li>
-            <li className="fixing-policy">
-              <FontAwesomeIcon icon={faBook} color="white" size="2px"/>
+            <li>
+              <FontAwesomeIcon icon={faBook} color="#ccc" size="2px"/>
               <a href="#">Privacy Policy</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faComments} color="white" size="2px"/>
+              <FontAwesomeIcon icon={faComments} color="#ccc" size="2px"/>
               <a href="#">FQA</a>
             </li>
-            <li className="fixing-request">
-              <FontAwesomeIcon icon={faEnvelope} color="white" size="2px"/>
-              <a href="#">Sign in</a>
+            <li>
+              <FontAwesomeIcon icon={faUser} color="#ccc" size="2px"/>
+              <button id="btn-signin">Sign in</button>
             </li>
           </ul>
         </div>
@@ -61,6 +63,11 @@ function HomePage() {
           <div className="animation-txt">Welcome to DongFlix ^_____^ where worlds collide and legends rise!
           Watch (●'◡'●)💕Renegade Immortal, 💀Perfect World, 🤩Battle Through the Heavens, etc.
           Sit back🍜 relax🥱😴 and enjoy your Donghua adventure!⚔️</div>
+        </div>
+      </div>
+      <div className="container-2">
+        <div className="banner-show">
+          <BannerPage />
         </div>
       </div>
     </header>

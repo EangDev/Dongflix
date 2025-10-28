@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from api import Main
+import requests
 
 app = FastAPI()
 main = Main()
@@ -9,12 +10,25 @@ main = Main()
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this to your frontend URL in production
+    allow_origins=["http://localhost:3000"],  # Change this to your frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.get("/banner")
+def get_banner():
+    """
+    Fetch top-airing anime from Consumet API and return as JSON.
+    """
+    url = "https://api.consumet.org/anime/gogoanime/top-airing"
+    try:
+        r = requests.get(url)
+        r.raise_for_status()  # Raise error if status != 200
+        return r.json()
+    except requests.RequestException as e:
+        return {"error": str(e)}
+    
 @app.get("/")
 async def read_root(page: Optional[int] = Query(1, description="Page number")):
     """
