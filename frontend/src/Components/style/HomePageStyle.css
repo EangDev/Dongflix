@@ -49,7 +49,7 @@ body{
 .search-box input{
     width: 280px;
     height: 35px;
-    border-radius: 5px;
+    border-radius: 10px;
     border: 1px solid #ccc;
     background: none;
     flex-shrink: 1;
@@ -65,12 +65,18 @@ body{
 #btn-search{
     display: flex;
     border: 0;
-    border-radius: 5px;
+    border-radius: 55px;
     background: var(--bg-hoverBG);
     cursor: pointer;
 }
+#btn-search:hover{
+    background-color: var(--bg-hoverBG);
+    color: #fff;
+    transform: scale(1.05);
+}
 #btn-search:active{
-    background: var(--bg-activeBG);
+    background-color: var(--bg-activeBG);
+    transform: scale(0.98);
 }
 .Magnifying{
     color: var(--txt-color);
@@ -78,75 +84,86 @@ body{
     font-weight: bold;
     padding: 12px;
 }
-.menu-text{
+.menu-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.menu-text ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  height: 100%; 
+}
+
+
+.menu-text ul li {
+  display: flex;             
+  flex-direction: column;    
+  align-items: center;       
+  justify-content: center;   
+  gap: 4px;                 
+}
+
+.menu-text ul li a {
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 6px; 
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: var(--txt-color);
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+}
+
+.menu-text ul li a:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.menu-text ul li a:active {
+  background-color: var(--bg-activeBG);
+  transform: scale(0.98);
+}
+
+#btn-signin {
     display: flex;
-    position: relative;
-    width: 100%;
+    align-items: center;
     justify-content: center;
-    text-align: center;
-}
-.menu-text ul{
-    display: flex;
-    width: 100%;
-    text-decoration: none;
-    flex-shrink: 1;
-    transition: ease-in .2s;
-}
-.menu-text li{
-    display: flex;
-    text-decoration: none;
-    list-style: none;
-    text-align: center;
-    justify-content: center;
-    padding: 10px;
-}
-.menu-text ul li a{
-    display: block;
-    text-decoration: none;
-    color: var(--txt-color);
     font-weight: bold;
     font-size: 14px;
     font-family: 'Rolam', sans-serif;
     letter-spacing: 1px;
-    padding-left: 5px;
-    cursor: pointer;
-}
-.menu-text ul li:hover{
-    display: inline;
-    color: var(--txt-color);
-    background-color: var(--bg-hoverBG);
-    width: 80px;
-    height: 30px;
-    border-radius: 5px;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    overflow: hidden;
-}
-.menu-text ul li:active{
-    display: inline;
-    color: var(--txt-color);
-    background-color: var(--bg-activeBG);
-    width: 80px;
-    height: 30px;
-    border-radius: 5px;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    overflow: hidden;
-}
-#btn-signin{
-    display: flex;
-    font-weight: bold;
-    font-size: 14px;
-    font-family: 'Rolam', sans-serif;
-    letter-spacing: 1px;
-    padding-left: 15px;
+    padding: 8px 15px;
     cursor: pointer;
     border: 0;
-    background: none;
+    border-radius: 5px;
+    transition: all 0.25s ease;
+    background-color: transparent;
     color: var(--txt-color);
 }
+
+#btn-signin:hover {
+    background-color: var(--bg-hoverBG);
+    color: #fff;
+}
+
+#btn-signin:active {
+    background-color: var(--bg-activeBG);
+}
+
 .container-1{
     position: relative;
     width: 100%;
@@ -176,17 +193,62 @@ body{
     display: flex;
     position: relative;
 }
-.banner-show{
-    position: absolute;
-    width: 100%;
-    height: 400px;
-    align-items: center;
-    overflow: hidden;
+/* --- Banner Swiper Custom Styles --- */
+
+/* Center and size Swiper container */
+.banner-show {
+  position: relative;
+  width: 100%;
+  /*height: auto;*/
+  height: 450px;
+  /*if you want to not crop the banner just remove the comment height auto and hide the height 450px*/
+  overflow: hidden;
 }
-.banner-show img{
-    overflow: hidden;
-    width: 100%;
+
+.banner-show img {
+  width: 100%;
+  /*height: auto;*/
+  height: 100%;
+  object-fit: cover;
+  /*also the same for this but you to remove the height 100,*/
+  object-position: center;
 }
+
+/* --- Arrows --- */
+.banner-show .swiper-button-next,
+.banner-show .swiper-button-prev {
+  color: var(--bg-hoverBG); 
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  transition: all 0.3s ease;
+}
+
+.banner-show .swiper-button-next:hover,
+.banner-show .swiper-button-prev:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.1);
+}
+
+/* Remove "Next"/"Prev" text and just show icons */
+.banner-show .swiper-button-next::after,
+.banner-show .swiper-button-prev::after {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* --- Pagination Dots --- */
+.banner-show .swiper-pagination-bullet {
+  background: var(--bg-hoverBG);
+  opacity: 0.7;
+}
+
+.banner-show .swiper-pagination-bullet-active {
+  background: var(--bg-activeBG);
+  opacity: 1;
+}
+
 .swiper {
   width: 100%;
   height: 100%;
@@ -226,46 +288,123 @@ body{
     cursor: pointer;
     overflow: hidden;
 }
-span{
-    color: var(--bg-mainBG);
+/* --- LATEST UPDATE SECTION --- */
+.latest-update-section {
+  position: relative;
+  width: 100%;
+  padding: 60px 0;
+  background-color: var(--bg-mainBG);
+  overflow: hidden;
 }
-.latest-update-header{
-    display: flex;
-    position: absolute;
-    width: 100%;
-    justify-content: left;
-    text-align: left;
-    left: 0;
-    bottom: 0;
+
+/* Title style */
+.latest-update-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 20px;
+  margin-bottom: 40px;
 }
-.latest-update-link{
-    display: flex;
-    width: 100%;
-    text-decoration: none;
-    flex-shrink: 1;
+
+.latest-update-link ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-.latest-update-link ul{
-    display: flex;
-    text-decoration: none;
-    list-style: none;
-    padding: 10px;
+
+.latest-update-link li a {
+  text-decoration: none;
+  color: var(--txt-color);
+  font-weight: bold;
+  font-size: 20px;
+  font-family: 'Rolam', sans-serif;
 }
-.latest-update-link li{
-    display: flex;
-    text-decoration: none;
-    list-style: none;
-    padding: 10px;
+
+.latest-update-link span {
+  color: var(--bg-mainBG);
+  background-color: var(--bg-sliceBG);
+  padding: 6px 10px;
+  border-radius: 20px 5px;
 }
-.latest-update-link ul li a{
-    display: block;
-    text-decoration: none;
-    color: var(--txt-color);
-    font-weight: bold;
-    font-size: 18px;
-    font-family: 'Rolam', sans-serif;
-    letter-spacing: 1px;
-    padding-left: 5px;
+
+/* Swiper container */
+.latest-update-body {
+  position: relative;
+  width: 100%;
+  padding: 10px 0 40px 0;
+}
+
+.latest-banner-show {
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* Fix spacing between slides */
+.latest-banner-show .swiper-slide {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+.latest-banner-show img {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.latest-banner-show button{
+    border: none;
+    background: none;
+    border-style: none;
     cursor: pointer;
+}
+.latest-banner-show img:hover {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+  transform: scale(1.05);
+}
+.latest-banner-show img:active {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+  transform: scale(1.05);
+}
+
+/* --- Arrows for Latest section --- */
+.latest-banner-show .swiper-button-next,
+.latest-banner-show .swiper-button-prev {
+  color: var(--bg-hoverBG);
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  transition: all 0.3s ease;
+}
+
+.latest-banner-show .swiper-button-next:hover,
+.latest-banner-show .swiper-button-prev:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.1);
+}
+
+.latest-banner-show .swiper-button-next::after,
+.latest-banner-show .swiper-button-prev::after {
+  font-size: 18px;
+}
+
+/* Dots for pagination */
+.latest-banner-show .swiper-pagination-bullet {
+  background: var(--bg-hoverBG);
+  opacity: 0.7;
+}
+
+.latest-banner-show .swiper-pagination-bullet-active {
+  background: var(--bg-activeBG);
+  opacity: 1;
 }
 
 /*end of latest donghua page jsx file*/
