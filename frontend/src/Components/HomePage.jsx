@@ -7,6 +7,7 @@ faScroll
 import './style/HomePageStyle.css';
 import logo from '../Assets/mylogo.png';
 import BannerPage from '../Components/BannerPage';
+import LatestDonghuaPage from '../Components/LatestDonghuaPage';
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,6 +69,11 @@ function HomePage() {
       <div className="container-2">
         <div className="banner-show">
           <BannerPage />
+        </div>
+      </div>
+      <div className="container-3">
+        <div className="latest-update-link">
+          <LatestDonghuaPage />
         </div>
       </div>
     </header>

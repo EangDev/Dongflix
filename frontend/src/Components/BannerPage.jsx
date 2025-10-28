@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from 'react';
-import logo from '../Assets/mylogo.png';
 import b1 from '../Assets/pic1.png';
 import b2 from '../Assets/pic2.png';
 import './style/HomePageStyle.css';
