@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import '../Components/style/PopularStyle.css';
+import '../Components/style/CompletePageStyle.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
 
-function PopularPage() {
-    const [popularDong, setPopularDong] = useState([]);
+function CompletePage(){
+    const [completeDong, setCompleteDong] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewAll, setViewAll] = useState(false);
@@ -14,22 +14,22 @@ function PopularPage() {
     const ITEM_PER_PAGE = 5;
 
     useEffect(() => {
-        async function fetchPopDonghua(){
+        async function fetchComDonghua(){
             try{
-                const res = await fetch('http://127.0.0.1:8000/api/animate');
+                const res = await fetch('http://127.0.0.1:8000/api/completed');
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
-                const list = Array.isArray(data.results) ? data.results : [];
-                setPopularDong(list);
+                const list = Array.isArray(data) ? data : data.data || []; 
+                setCompleteDong(list);
             }catch(err){
                 console.error('Failed to fetch', err);
-                setError('Failed to load popular anime.');
-                setPopularDong([]);
+                setError('Failed to load completed anime.');
+                setCompleteDong([]);
             }finally{
                 setLoading(false);
             }
         }
-        fetchPopDonghua();
+        fetchComDonghua();
     }, []);
 
     if (loading) return <p>Loading...</p>;
@@ -37,8 +37,8 @@ function PopularPage() {
 
     const indexOfLast = currentPage * ITEM_PER_PAGE;
     const indexOfFirst = (currentPage - 1) * ITEM_PER_PAGE;
-    const currentItems = viewAll ? popularDong : popularDong.slice(indexOfFirst, indexOfLast);
-    const totalPage = Math.ceil(popularDong.length / ITEM_PER_PAGE);
+    const currentItems = viewAll ? completeDong : completeDong.slice(indexOfFirst, indexOfLast);
+    const totalPage = Math.ceil(completeDong.length / ITEM_PER_PAGE);
         
     const handleNext = () => {
         if(currentPage < totalPage) setCurrentPage(prev => prev + 1);
@@ -56,38 +56,38 @@ function PopularPage() {
     };
 
     return (
-        <section className="popular-dong-section">
-        <div className='popular-dong-header'>
-            <div className='popular-dong-link'>
+        <section className="complete-dong-section">
+        <div className='complete-dong-header'>
+            <div className='complete-dong-link'>
             <ul>
                 <li>
                 <a href="#">
-                    <span>Popular</span> Watch
+                    <span>Completed</span> Watch
                 </a>
                 <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
                 </li>
             </ul>
             </div>
         </div>     
-        <div className='popular-dong-body'>
+        <div className='complete-dong-body'>
             {/* Anime grid */}
-            <div className='popular-banner-grid'>
+            <div className='complete-banner-grid'>
                 {currentItems.map((item, index) => (
-                    <div className="popular-donghua-slide" key={index}>
-                    <div className="popular-image-wrapper">
+                    <div className="complete-donghua-slide" key={index}>
+                    <div className="complete-image-wrapper">
                         <img src={item.thumbnail} alt={item.title} />
-                        <div className="popular-play-overlay">
+                        <div className="complete-play-overlay">
                         <FontAwesomeIcon icon={faCirclePlay}/>
                         </div>
-                        <p className='popular-donghua-episode'>Ep {item.episodesCount || "?"}</p>
+                        <p className='complete-donghua-episode'>Ep {item.episodesCount || "?"}</p>
                     </div>
-                    <a href='#' className="popular-donghua-title"><p>{item.title}</p></a>
+                    <a href='#' className="complete-donghua-title"><p>{item.title}</p></a>
                     </div>
                 ))}
             </div>
 
             {/* Pagination Button */}
-            <div className="popular-btn-ViewPage">
+            <div className="complete-btn-ViewPage">
             {!viewAll ? (
                 <>
                 <button onClick={handlePrev} disabled={currentPage === 1}>Prev</button>
@@ -103,4 +103,4 @@ function PopularPage() {
     );
 }
 
-export default PopularPage;
+export default CompletePage;

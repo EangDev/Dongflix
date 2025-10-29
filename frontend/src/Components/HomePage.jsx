@@ -6,8 +6,10 @@ faHeart, faBookOpen, faEnvelope, faTelevision
 import './style/HomePageStyle.css';
 import logo from '../Assets/mylogo.png';
 import BannerPage from '../Components/BannerPage';
-import LatestDonghuaPage from '../Components/LatestDonghuaPage';
+import LatestDonghuaPage from './LatestPage';
 import PopularDonghuaPage from '../Components/PopularPage';
+import CompleteDonghuaPage from '../Components/CompletePage';
+
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,6 +77,7 @@ function HomePage() {
         <div className="donghua-body-section">
           <PopularDonghuaPage />
           <LatestDonghuaPage />
+          <CompleteDonghuaPage />
         </div>
       </div>
     </header>

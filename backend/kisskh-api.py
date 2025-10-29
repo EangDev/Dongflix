@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 from dotenv import load_dotenv
 import os
+import time
 
 app = FastAPI()
 
@@ -18,8 +19,33 @@ app.add_middleware(
 )
 
 @app.get("/api/animate")
-def get_animate():
-    url = "https://kisskh.co/api/DramaList/List?page=1&type=3&sub=0&country=1&status=0&order=1";
+def get_animate(max_pages: int = 5):
+    
+    headers = {"User-Agent": USER_AGENT}
+    all_results = []
+
+    for page in range(1, max_pages + 1):
+        url = f"https://kisskh.co/api/DramaList/List?page={page}&type=3&sub=0&country=1&status=0&order=1"
+        res = requests.get(url, headers=headers)
+
+        if res.status_code != 200:
+            break
+
+        try:
+            data = res.json()
+            results = data.get("data") or data.get("dramas") or data.get("list") or data
+            if not results:
+                break
+            all_results.extend(results)
+            time.sleep(0.3)  # prevent being rate-limited
+        except ValueError:
+            break
+
+    return {"count": len(all_results), "results": all_results}
+    
+@app.get("/api/completed")
+def get_completed_anim():
+    url = "https://kisskh.co/api/DramaList/List?page=2&type=3&sub=0&country=1&status=2&order=1";
     headers = {"User-Agent": USER_AGENT}
     
     res = requests.get(url, headers=headers)

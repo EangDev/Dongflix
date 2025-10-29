@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './style/HomePageStyle.css';
+import './style/LatestPageStyle.css';
 import loadingImg from '../Assets/loading.gif'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
