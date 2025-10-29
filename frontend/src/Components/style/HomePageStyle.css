@@ -215,7 +215,7 @@ body {
   align-items: center;
   gap: 8px;
   margin-left: 20px;
-  margin-bottom: 60px;
+  margin-bottom: 35px;
 }
 .latest-update-link ul{
   list-style: none;
@@ -239,6 +239,15 @@ body {
 }
 
 /* --- Donghua Grid --- */
+.latest-update-body{
+  width: 90%;
+  margin: 0 auto;
+  display: block;
+  background-color: rgba(110, 110, 110, 0.1);
+  padding: 40px 0;
+  border-radius: 10px;
+}
+
 .latest-banner-grid {
   width: 90%;
   margin: 0 auto;
@@ -293,7 +302,10 @@ body {
   text-align: center;
   width: 200px;
   transition: color 0.3s ease;
+  text-decoration: none;
+  color: var(--txt-color);
 }
+
 .image-wrapper:hover + .donghua-title {
   color: var(--bg-activeBG);
 }

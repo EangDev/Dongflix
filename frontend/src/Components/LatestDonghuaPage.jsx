@@ -3,25 +3,21 @@ import './style/HomePageStyle.css';
 import loadingImg from '../Assets/loading.gif'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, 
-  faCirclePlay,
-  faL
- } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
 
 function LatestDonghuaPage() {
   const [donghuaList, setDonghuaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
-  const [closeAll, setCloseAll] = useState(false);
-
+  
   const ITEM_PER_PAGE = 20;
 
   // Fetch from backend
   useEffect(() => {
     async function fetchDonghua() {
       try {
-        const res = await fetch('http://127.0.0.1:8000/lucifer');
+        const res = await fetch('http://127.0.0.1:8001/lucifer');
         const data = await res.json();
         setDonghuaList(data.data || []);
       } catch (err) {
@@ -70,14 +66,13 @@ function LatestDonghuaPage() {
           <ul>
             <li>
               <a href="#">
-                <span>Latest</span> Update
+                <span>Latest</span> Release
               </a>
               <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
             </li>
           </ul>
         </div>
-      </div>
-
+      </div>     
       <div className='latest-update-body'>
         {/* Anime grid */}
         <div className='latest-banner-grid'>
@@ -90,7 +85,7 @@ function LatestDonghuaPage() {
                 </div>
                 <p className='donghua-episode'>Ep {item.episode || "?"}</p>
               </div>
-              <p className="donghua-title">{item.title}</p>
+              <a href='#' className="donghua-title"><p>{item.title}</p></a>
             </div>
           ))}
         </div>

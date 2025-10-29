@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComment, faUser, faMagnifyingGlass, faHouse,   
-faComments, faBook, faEnvelope,
-faScroll
+import { faUser, faMagnifyingGlass, faHouse,   
+faHeart, faBookOpen, faEnvelope, faTelevision
 } from "@fortawesome/free-solid-svg-icons";
 import './style/HomePageStyle.css';
 import logo from '../Assets/mylogo.png';
 import BannerPage from '../Components/BannerPage';
 import LatestDonghuaPage from '../Components/LatestDonghuaPage';
+import PopularDonghuaPage from '../Components/PopularPage';
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,20 +37,20 @@ function HomePage() {
               <a href="#">Home</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faScroll} color="#ccc" size="lg"/>
+              <FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg"/>
               <a href="#">About Us</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faComment} color="#ccc" size="lg"/>
+              <FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/>
               <a href="#">Contact Us</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faBook} color="#ccc" size="lg"/>
-              <a href="#">Privacy Policy</a>
+              <FontAwesomeIcon icon={faHeart} color="#ccc" size="lg"/>
+              <a href="#">Support Us</a>
             </li>
             <li>
-              <FontAwesomeIcon icon={faComments} color="#ccc" size="lg"/>
-              <a href="#">FQA</a>
+              <FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/>
+              <a href="#">Hide ADS</a>
             </li>
             <li>
               <FontAwesomeIcon icon={faUser} color="#ccc" size="lg"/>
@@ -72,7 +72,8 @@ function HomePage() {
         </div>
       </div>
       <div className="container-3">
-        <div className="latest-update-link">
+        <div className="donghua-body-section">
+          <PopularDonghuaPage />
           <LatestDonghuaPage />
         </div>
       </div>
