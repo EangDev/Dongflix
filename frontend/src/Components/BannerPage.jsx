@@ -10,6 +10,27 @@ import 'swiper/css/pagination';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 
 function Banner(){
+    const [donghuaList, setDonghuaList] = useState([]);
+      const [loading, setLoading] = useState(true);
+    
+      // Fetch from backend
+      useEffect(() => {
+        async function fetchDonghua() {
+          try {
+            const res = await fetch('http://127.0.0.1:8000/lucifer');
+            const data = await res.json();
+            setDonghuaList(data.data || []);
+          } catch (err) {
+            console.error('Failed to fetch donghua:', err);
+          } finally {
+            setLoading(false);
+          }
+        }
+    
+        fetchDonghua();
+      }, []);
+    
+      if (loading) return <p>Loading latest donghua...</p>;
 
     return(
         <header>
@@ -30,12 +51,11 @@ function Banner(){
                             modules={[Autoplay, Pagination, Navigation]}
                             className="mySwiper"
                         >
-                            <SwiperSlide>
-                                <img src={b1} alt="banner" />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <img src={b2} alt="banner" />
-                            </SwiperSlide>
+                            {donghuaList.map((item, index) => (
+                                <SwiperSlide key={index}>
+                                    <img src={item.image} alt={item.title} />
+                                </SwiperSlide>
+                            ))}
                         </Swiper>
                     </>
                 </div>

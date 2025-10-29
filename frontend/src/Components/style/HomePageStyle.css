@@ -197,21 +197,15 @@ body{
 
 /* Center and size Swiper container */
 .banner-show {
-  position: relative;
   width: 100%;
-  /*height: auto;*/
-  height: 450px;
-  /*if you want to not crop the banner just remove the comment height auto and hide the height 450px*/
   overflow: hidden;
 }
 
 .banner-show img {
-  width: 100%;
-  /*height: auto;*/
-  height: 100%;
-  object-fit: cover;
-  /*also the same for this but you to remove the height 100,*/
-  object-position: center;
+    width: 100%;
+    height: auto;       
+    max-height: 450px;
+    object-fit: cover;
 }
 
 /* --- Arrows --- */
@@ -339,6 +333,67 @@ body{
   margin: 0 auto;
 }
 
+.donghua-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 200px;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.image-wrapper img {
+  width: 100%;
+  height: auto;      /* maintain aspect ratio */
+  max-height: 250px; /* optional max height */
+  object-fit: contain; /* instead of cover, no cropping */
+}
+
+.image-wrapper .play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 50px;
+  font-weight: bold;
+  color: #00c3ff;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.image-wrapper:hover img {
+  opacity: 0.5;
+  transform: scale(1.05);
+}
+
+.image-wrapper:hover .play-overlay {
+  opacity: 1;
+}
+
+.donghua-title {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+  text-align: center;
+  width: 200px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  transition: color 0.3s ease;
+}
+
+.image-wrapper:hover + .donghua-title {
+  color: #00c3ff;
+}
+
 /* Fix spacing between slides */
 .latest-banner-show .swiper-slide {
   display: flex;
@@ -348,8 +403,7 @@ body{
 
 .latest-banner-show img {
   width: 200px;
-  height: 200px;
-  border-radius: 8px;
+  height: 250px;
   object-fit: cover;
 }
 
@@ -361,14 +415,14 @@ body{
 }
 .latest-banner-show img:hover {
   width: 200px;
-  height: 200px;
+  height: 255px;
   border-radius: 10px;
   object-fit: cover;
   transform: scale(1.05);
 }
 .latest-banner-show img:active {
   width: 200px;
-  height: 200px;
+  height: 250px;
   border-radius: 10px;
   object-fit: cover;
   transform: scale(1.05);

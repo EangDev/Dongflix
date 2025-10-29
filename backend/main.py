@@ -1,143 +1,73 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
-from api import Main
 import requests
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+import os
+from urllib.parse import urlparse
+
+# Load environment variables
+load_dotenv()
+LUCIFER_URL = os.getenv("LUCIFER_URL")
+USER_AGENT = os.getenv("USER_AGENT")
+
+# Validate URL
+if not LUCIFER_URL or not urlparse(LUCIFER_URL).scheme:
+    raise ValueError(f"Invalid LUCIFER_URL in .env: {LUCIFER_URL}")
+
+# Validate User-Agent
+if not USER_AGENT:
+    raise ValueError("USER_AGENT is missing in .env")
 
 app = FastAPI()
-main = Main()
 
-# CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Change this to your frontend URL in production
+    allow_origins=["http://localhost:3000"],  # frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/banner")
-def get_banner():
-    """
-    Fetch top-airing anime from Consumet API and return as JSON.
-    """
-    url = "https://api.consumet.org/anime/gogoanime/top-airing"
+# =======================================
+# 🔥 Scraper endpoint for luciferdonghua.in
+# =======================================
+@app.get("/lucifer")
+def get_lucifer_home():
     try:
-        r = requests.get(url)
-        r.raise_for_status()  # Raise error if status != 200
-        return r.json()
-    except requests.RequestException as e:
-        return {"error": str(e)}
-    
-@app.get("/")
-async def read_root(page: Optional[int] = Query(1, description="Page number")):
-    """
-    Get home page
-    params: page (optional) - int
-    return: JSON
-    """
-    try:
-        return main.get_home(page)
+        headers = {"User-Agent": USER_AGENT}
+        res = requests.get(LUCIFER_URL, headers=headers)
+        res.raise_for_status()
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        latest_section = soup.select_one("div.listupd.normal div.excstf")
+        donghua_list = []
+        
+        if latest_section:
+            for item in latest_section.select("article.bs"):
+                link_tag = item.select_one("a.tip")
+                if link_tag:
+                    title = link_tag.get("title")
+                    link = link_tag.get("href")
+                    
+                    img_tag = link_tag.select_one("img")
+                    image = (
+                        img_tag.get("data-srcset") or
+                        img_tag.get("data-src") or 
+                        img_tag.get("src")
+                    )
+                    
+                    donghua_list.append({
+                        "title": title,
+                        "link": link,
+                        "image": image
+                    })
+
+        return {"count": len(donghua_list), "data": donghua_list}
+
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
     except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
+        raise HTTPException(status_code=500, detail=f"Scraper error: {str(err)}")
 
-
-@app.get("/search/{query}")
-async def search(query: str):
-    """
-    Search donghua by query
-    params: query - string (required)
-    return: JSON
-    """
-    if not query:
-        raise HTTPException(status_code=400, detail="missing query parameter")
-    try:
-        return main.search(query)
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-
-@app.get("/info/{slug}")
-async def get_info(slug: str):
-    """
-    Show detail of donghua
-    params: slug name of donghua - string (required)
-    return: JSON
-    """
-    try:
-        return main.get_info(slug)
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-
-@app.get("/genres")
-async def list_genres():
-    """
-    Show list of genres
-    return: JSON
-    """
-    try:
-        return main.genres()
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-
-@app.get("/genre/{slug}")
-async def get_genre(slug: str, page: Optional[int] = Query(1, description="Page number")):
-    """
-    Show list of donghua by genre
-    params: slug genre - string (required)
-    query: page (optional) - int
-    return: JSON
-    """
-    try:
-        return main.genres(slug, page)
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-
-@app.get("/episode/{slug}")
-async def get_episode(slug: str):
-    """
-    Get detail of episode
-    params: slug episode - string (required)
-    return: JSON
-    """
-    try:
-        data = main.get_episode(slug)
-        if data:
-            return data
-        raise HTTPException(status_code=404, detail="not found")
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-
-@app.get("/video-source/{slug}")
-async def get_video(slug: str):
-    """
-    Show list of video source
-    params: slug - string (required)
-    return: JSON
-    """
-    try:
-        data = main.get_video_source(slug)
-        if data:
-            return data
-        raise HTTPException(status_code=404, detail="not found")
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-
-@app.get("/anime")
-async def anime(page: Optional[int] = Query(1, description="Page number")):
-    """
-    Show list of anime
-    return: JSON
-    """
-    try:
-        # Pass page directly as a keyword argument
-        return main.anime(page=page)
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=str(err))
-
-# Run with: uvicorn main:app --reload
