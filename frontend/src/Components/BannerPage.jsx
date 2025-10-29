@@ -1,37 +1,21 @@
-import { useRef, useEffect, useState } from 'react';
-import b1 from '../Assets/pic1.png';
-import b2 from '../Assets/pic2.png';
+import React from 'react';
 import './style/HomePageStyle.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+import pw from '../Assets/images/pw.jpg'
+import btth from '../Assets/images/btth.jpg'
+import ri from '../Assets/images/ri.jpg'
+import sl1 from '../Assets/images/sl1.jpg'
+import sl2 from '../Assets/images/sl2.jpg'
+import sw from '../Assets/images/sw.jpg'
+import ss from '../Assets/images/ss.jpg'
+
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 
 function Banner(){
-    const [donghuaList, setDonghuaList] = useState([]);
-      const [loading, setLoading] = useState(true);
-    
-      // Fetch from backend
-      useEffect(() => {
-        async function fetchDonghua() {
-          try {
-            const res = await fetch('http://127.0.0.1:8000/lucifer');
-            const data = await res.json();
-            setDonghuaList(data.data || []);
-          } catch (err) {
-            console.error('Failed to fetch donghua:', err);
-          } finally {
-            setLoading(false);
-          }
-        }
-    
-        fetchDonghua();
-      }, []);
-    
-      if (loading) return <p>Loading latest donghua...</p>;
-
     return(
         <header>
             <div className='banner-header'>
@@ -47,15 +31,30 @@ function Banner(){
                             pagination={{
                             clickable: true,
                             }}
-                            navigation={true}
-                            modules={[Autoplay, Pagination, Navigation]}
+                            modules={[Autoplay, Pagination]}
                             className="mySwiper"
                         >
-                            {donghuaList.map((item, index) => (
-                                <SwiperSlide key={index}>
-                                    <img src={item.image} alt={item.title} />
-                                </SwiperSlide>
-                            ))}
+                            <SwiperSlide>
+                                    <img src={pw} alt="Perfect-World" />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                    <img src={btth} alt="Battle-Through-The-Heavens" />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                    <img src={ri} alt="Renegade-Immortal" />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                    <img src={sl1} alt="Soul-Land-1" />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                    <img src={sl2} alt="Soul-Land-2" />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                    <img src={sw} alt="Sword-Of-Coming" />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                    <img src={ss} alt="Swallowed-Star" />
+                            </SwiperSlide>
                         </Swiper>
                     </>
                 </div>
