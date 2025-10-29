@@ -27,8 +27,10 @@ body {
 /* --- Loading Overlay --- */
 .loading {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -62,6 +64,7 @@ body {
   width: 180px;
   height: 60px;
   padding: 10px;
+  border-radius: 15px;
 }
 
 /* --- Search Box --- */
@@ -88,12 +91,13 @@ body {
   border-radius: 55px;
   background: var(--bg-hoverBG);
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 9px 14px;
   transition: all 0.25s ease;
 }
 #btn-search:hover {
   background-color: var(--bg-activeBG);
   transform: scale(1.05);
+  .Magnifying{color: #fff;}
 }
 .Magnifying {
   color: var(--txt-color);
@@ -103,18 +107,31 @@ body {
 .menu-text ul {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  align-items: flex-end; /* align all menu items and sign-in in the same row */
+  gap: 20px; /* spacing between menu items */
   padding: 0;
   margin: 0;
   list-style: none;
 }
+
+/* Each menu item with icon above text */
+.menu-text ul li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px; /* space between icon and text */
+}
+
+/* Links inside menu */
 .menu-text ul li a {
   display: flex;
+  flex-direction: column; /* icon above text */
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 20px;
+  gap: 4px;
+  padding: 8px 12px;
   border-radius: 5px;
+  font-size: 14px;
   text-decoration: none;
   color: var(--txt-color);
   font-weight: bold;
@@ -122,20 +139,30 @@ body {
   letter-spacing: 1px;
   transition: all 0.25s ease;
 }
+
 .menu-text ul li a:hover {
   background-color: var(--bg-hoverBG);
   color: #fff;
   transform: scale(1.05);
 }
+
 #btn-signin {
-  background: transparent;
-  color: var(--txt-color);
-  border: none;
-  font-family: 'Rolam', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
+  font-size: 14px;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  padding: 8px 15px;
   cursor: pointer;
+  border-radius: 5px;
   transition: all 0.25s ease;
+  background-color: transparent;
+  color: var(--txt-color);
+  border: 0;
 }
+
 #btn-signin:hover {
   background-color: var(--bg-hoverBG);
   color: #fff;
@@ -147,20 +174,24 @@ body {
   min-height: 35px;
   background-color: var(--bg-hoverBG);
   overflow: hidden;
+  position: relative;
 }
+
 .animated-text {
   display: flex;
   align-items: center;
-  height: 30px;
+  height: 35px;
   white-space: nowrap;
+  position: relative;
 }
+
 .animation-txt {
   position: absolute;
-  right: 0;
+  right: -100%; /* start off-screen */
   color: var(--txt-color);
   font-size: 20px;
   font-weight: bold;
-  animation: move 40s linear infinite;
+  animation: move 35s linear infinite;
 }
 
 /* --- Banner Section --- */
@@ -174,8 +205,6 @@ body {
   object-fit: cover;
 }
 
-/* ❌ removed swiper arrow/pagination styles — not used unless Swiper is active */
-
 /* --- Latest Donghua Section --- */
 .latest-update-section {
   padding: 60px 0;
@@ -186,8 +215,14 @@ body {
   align-items: center;
   gap: 8px;
   margin-left: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
+.latest-update-link ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 .latest-update-link a {
   text-decoration: none;
   color: var(--txt-color);
@@ -196,6 +231,7 @@ body {
   font-family: 'Rolam', sans-serif;
 }
 .latest-update-link span {
+  list-style-type: none;
   background-color: var(--bg-sliceBG);
   color: var(--bg-mainBG);
   padding: 6px 10px;
@@ -271,7 +307,7 @@ body {
   font-size: 12px;
   font-weight: bold;
   color: #fff;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Space Mono', sans-serif;
 }
 
 /* --- Pagination Buttons --- */
@@ -287,6 +323,7 @@ body {
   border: none;
   border-radius: 6px;
   padding: 10px 18px;
+  font-family: 'Space Mono', sans-serif;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -304,6 +341,6 @@ body {
 
 /* --- Keyframe for Scrolling Text --- */
 @keyframes move {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-60%); }
+  from { transform: translateX(50%); }
+  to { transform: translateX(-100%); } /* go fully across */
 }

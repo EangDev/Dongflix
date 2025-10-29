@@ -13,6 +13,7 @@ function LatestDonghuaPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
+  const [closeAll, setCloseAll] = useState(false);
 
   const ITEM_PER_PAGE = 20;
 
@@ -57,6 +58,11 @@ function LatestDonghuaPage() {
 
   const handleViewAll = () => setViewAll(true);
 
+  const handleCloseViewAll = () => {
+    setViewAll(false);
+    setCurrentPage(1);
+  };
+
   return (
     <section className="latest-update-section">
       <div className='latest-update-header'>
@@ -90,13 +96,17 @@ function LatestDonghuaPage() {
         </div>
 
         {/* Pagination Button */}
-        {!viewAll && (
-          <div className="btn-ViewPage">
+        <div className="btn-ViewPage">
+          {!viewAll ? (
+            <>
               <button onClick={handlePrev} disabled={currentPage === 1}>Prev</button>
               <button onClick={handleNext} disabled={currentPage === totalPage}>Next</button>
               <button onClick={handleViewAll}>View All</button>
-          </div>
-        )}
+            </>
+          ) : (
+            <button onClick={handleCloseViewAll}>Close</button>
+          )}
+        </div>
       </div>
     </section>
   );
