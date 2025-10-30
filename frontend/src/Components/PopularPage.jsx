@@ -62,7 +62,7 @@ function PopularPage() {
             <ul>
                 <li>
                 <a href="#">
-                    <span>Popular</span> Watch
+                    <span>Popular</span> Series
                 </a>
                 <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
                 </li>

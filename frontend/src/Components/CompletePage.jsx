@@ -19,7 +19,7 @@ function CompletePage(){
                 const res = await fetch('http://127.0.0.1:8000/api/completed');
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
-                const list = Array.isArray(data) ? data : data.data || []; 
+                const list = Array.isArray(data.results) ? data.results : []; 
                 setCompleteDong(list);
             }catch(err){
                 console.error('Failed to fetch', err);
@@ -62,7 +62,7 @@ function CompletePage(){
             <ul>
                 <li>
                 <a href="#">
-                    <span>Completed</span> Watch
+                    <span>Completed</span> Series
                 </a>
                 <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
                 </li>

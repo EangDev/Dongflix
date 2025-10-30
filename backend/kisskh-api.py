@@ -44,14 +44,26 @@ def get_animate(max_pages: int = 5):
     return {"count": len(all_results), "results": all_results}
     
 @app.get("/api/completed")
-def get_completed_anim():
-    url = "https://kisskh.co/api/DramaList/List?page=2&type=3&sub=0&country=1&status=2&order=1";
+def get_completed_anim(max_pages: int = 20):
+    
     headers = {"User-Agent": USER_AGENT}
+    all_completed_results = []
     
-    res = requests.get(url, headers=headers)
-    
-    try:
-        data = res.json()
-        return data
-    except ValueError:
-        return {"Error": "Failed To parse API"}
+    for page in range(1, max_pages + 1):
+        url = f"https://kisskh.co/api/DramaList/List?page={page}&type=3&sub=0&country=1&status=2&order=1";
+        res = requests.get(url, headers=headers)
+        
+        if res.status_code != 200:
+            break
+        
+        try:
+            data = res.json()
+            completed_results = data.get("data") or data.get("dramas")
+            if not completed_results:
+                break
+            all_completed_results.extend(completed_results)
+            time.sleep(0.3)
+        except ValueError:
+            return {"Error": "Failed To parse API"}
+        
+    return {"count": len(all_completed_results), "results": all_completed_results}
