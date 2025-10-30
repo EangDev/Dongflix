@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 from urllib.parse import urlparse
 import re
+import base64
 
 import time
 CACHE = {"data": [], "timestamp": 0}
@@ -104,3 +105,100 @@ def get_lucifer_home():
         raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
     except Exception as err:
         raise HTTPException(status_code=500, detail=f"Scraper error: {str(err)}")
+
+@app.get("/api/stream")
+def get_stream(url: str):
+    headers = {"User-Agent": USER_AGENT}
+    try:
+        res = requests.get(url, headers=headers)
+        if res.status_code != 200:
+            raise HTTPException(status_code=404, detail="Episode not found")
+        
+        soup = BeautifulSoup(res.text, "html.parser")
+        
+        # Find server links in the select dropdown (base64 encoded)
+        servers = {}
+        select = soup.select_one("select.mirror")
+        if select:
+            options = select.find_all("option")
+            for opt in options:
+                value = opt.get("value")
+                server_name = opt.text.strip()
+                if value:
+                    try:
+                        # decode base64
+                        decoded = base64.b64decode(value).decode("utf-8")
+                        # parse iframe src
+                        iframe_soup = BeautifulSoup(decoded, "html.parser")
+                        iframe = iframe_soup.find("iframe")
+                        if iframe and iframe.get("src"):
+                            servers[server_name] = iframe.get("src")
+                    except Exception as e:
+                        continue
+        
+        if not servers:
+            # fallback: try to get any iframe directly from page
+            iframe = soup.find("iframe")
+            if iframe and iframe.get("src"):
+                servers["default"] = iframe.get("src")
+        
+        if not servers:
+            raise HTTPException(status_code=404, detail="No video servers found")
+        
+        return {"servers": servers}
+
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
+
+@app.get("/api/all")
+def get_all():
+    try:
+        # Fetch Lucifer (latest)
+        lucifer = requests.get("http://127.0.0.1:8001/lucifer").json().get("data", [])
+        # Fetch Kisskh popular
+        kisskh = requests.get("http://127.0.0.1:8000/api/animate").json().get("results", [])
+        # Fetch Kisskh completed
+        kisskh_completed = requests.get("http://127.0.0.1:8000/api/completed").json().get("results", [])
+
+        # Normalize and tag
+        def normalize_lucifer(item):
+            return {
+                "title": item.get("title"),
+                "link": item.get("link"),
+                "image": item.get("image"),
+                "episode": item.get("episode"),
+                "source": "lucifer",
+                "category": "latest"  # mark as latest
+            }
+
+        def normalize_kisskh(item):
+            return {
+                "title": item.get("title"),
+                "link": item.get("url"),
+                "image": item.get("thumbnail"),
+                "episode": item.get("episodesCount"),
+                "source": "kisskh",
+                "category": "popular"  # mark as popular
+            }
+
+        def normalize_kisskh_completed(item):
+            return {
+                "title": item.get("title"),
+                "link": item.get("url"),
+                "image": item.get("thumbnail"),
+                "episode": item.get("episodesCount"),
+                "source": "kisskh",
+                "category": "completed"  # mark as completed
+            }
+
+        all_items = (
+            [normalize_lucifer(i) for i in lucifer] +
+            [normalize_kisskh(i) for i in kisskh] +
+            [normalize_kisskh_completed(i) for i in kisskh_completed]
+        )
+
+        return {"count": len(all_items), "results": all_items}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch combined data: {str(e)}")
+

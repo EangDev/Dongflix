@@ -44,7 +44,7 @@ def get_animate(max_pages: int = 5):
     return {"count": len(all_results), "results": all_results}
     
 @app.get("/api/completed")
-def get_completed_anim(max_pages: int = 20):
+def get_completed_anim(max_pages: int = 5):
     
     headers = {"User-Agent": USER_AGENT}
     all_completed_results = []

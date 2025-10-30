@@ -1,0 +1,181 @@
+:root {
+  --bg-mainBG: #000;
+  --bg-headerBG: #131313;
+  --bg-hoverBG: #0095c2;
+  --bg-activeBG: #00c3ff;
+  --bg-sliceBG: #bbefff;
+  --txt-color: #ccc;
+}
+
+/* --- Fonts --- */
+@font-face {
+  font-family: 'Rolam';
+  src: url(../../Assets/fonts/ROLAM-PersonalUse.otf);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+/* --- Global Styles --- */
+body {
+  margin: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-mainBG);
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+}
+
+/* --- Loading Overlay --- */
+.loading {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+.loading img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+.loading-text {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* --- Header --- */
+/* --- Header --- */
+.detail-header-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 80px;
+  background-color: var(--bg-headerBG);
+}
+.detail-header-container
+.detail-logo-img {
+  position: absolute;
+  left: 30px;
+}
+.detail-header-container
+.detail-logo-img img {
+  width: 180px;
+  height: 60px;
+  padding: 10px;
+  border-radius: 15px;
+}
+
+/* --- Search Box --- */
+.detail-header-container
+.detail-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 280px;
+}
+.detail-header-container
+.detail-search-box input {
+  width: 280px;
+  height: 35px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: none;
+  color: var(--txt-color);
+  font-weight: bold;
+}
+.detail-header-container
+.detail-search-box input::placeholder {
+  color: var(--txt-color);
+}
+.detail-header-container
+#detail-btn-search {
+  border: 0;
+  border-radius: 55px;
+  background: var(--bg-hoverBG);
+  cursor: pointer;
+  padding: 9px 14px;
+  transition: all 0.25s ease;
+}
+.detail-header-container
+#detail-btn-search:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.05);
+  .Magnifying{color: #fff;}
+}
+.detail-header-container
+.detail-magnifying {
+  color: var(--txt-color);
+}
+
+/* --- Menu --- */
+.detail-header-container
+.detail-menu-text ul {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* align all menu items and sign-in in the same row */
+  gap: 20px; /* spacing between menu items */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Each menu item with icon above text */
+.detail-header-container
+.detail-menu-text ul li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px; /* space between icon and text */
+}
+
+/* Links inside menu */
+.detail-header-container
+.detail-menu-text ul li a {
+  display: flex;
+  flex-direction: column; /* icon above text */
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--txt-color);
+  font-weight: bold;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+}
+.detail-header-container
+.detail-menu-text ul li a:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  transform: scale(1.05);
+}
+.detail-header-container
+#detail-btn-signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.25s ease;
+  background-color: transparent;
+  color: var(--txt-color);
+  border: 0;
+}
+.detail-header-container
+#detail-btn-signin:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+}

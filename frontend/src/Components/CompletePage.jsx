@@ -1,104 +1,74 @@
-import React, { useState, useEffect } from "react";
-import '../Components/style/CompletePageStyle.css';
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import './style/CompletePageStyle.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
 
-function CompletePage(){
-    const [completeDong, setCompleteDong] = useState([]);
-    const [loading, setLoading] = useState(true);
+function CompletePage({ data }) {
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
     const [viewAll, setViewAll] = useState(false);
-    const [error, setError] = useState(null);
-        
     const ITEM_PER_PAGE = 5;
 
-    useEffect(() => {
-        async function fetchComDonghua(){
-            try{
-                const res = await fetch('http://127.0.0.1:8000/api/completed');
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                const data = await res.json();
-                const list = Array.isArray(data.results) ? data.results : []; 
-                setCompleteDong(list);
-            }catch(err){
-                console.error('Failed to fetch', err);
-                setError('Failed to load completed anime.');
-                setCompleteDong([]);
-            }finally{
-                setLoading(false);
-            }
-        }
-        fetchComDonghua();
-    }, []);
-
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>{error}</p>;
+    const completeDong = data.filter(item => item.category === "completed");
 
     const indexOfLast = currentPage * ITEM_PER_PAGE;
     const indexOfFirst = (currentPage - 1) * ITEM_PER_PAGE;
     const currentItems = viewAll ? completeDong : completeDong.slice(indexOfFirst, indexOfLast);
     const totalPage = Math.ceil(completeDong.length / ITEM_PER_PAGE);
-        
-    const handleNext = () => {
-        if(currentPage < totalPage) setCurrentPage(prev => prev + 1);
-    }
 
-    const handlePrev = () => {
-        if(currentPage > 1) setCurrentPage(prev => prev - 1);
-    }
-
+    const handleNext = () => { if (currentPage < totalPage) setCurrentPage(prev => prev + 1); };
+    const handlePrev = () => { if (currentPage > 1) setCurrentPage(prev => prev - 1); };
     const handleViewAll = () => setViewAll(true);
+    const handleCloseViewAll = () => { setViewAll(false); setCurrentPage(1); };
 
-    const handleCloseViewAll = () => {
-        setViewAll(false);
-        setCurrentPage(1);
+    const handleDetail = (item) => {
+        if (!item.link) return alert("Video URL not available for this anime!");
+        navigate(`/watch?url=${encodeURIComponent(item.link)}`);
     };
 
     return (
         <section className="complete-dong-section">
-        <div className='complete-dong-header'>
-            <div className='complete-dong-link'>
-            <ul>
-                <li>
-                <a href="#">
-                    <span>Completed</span> Series
-                </a>
-                <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
-                </li>
-            </ul>
-            </div>
-        </div>     
-        <div className='complete-dong-body'>
-            {/* Anime grid */}
-            <div className='complete-banner-grid'>
-                {currentItems.map((item, index) => (
-                    <div className="complete-donghua-slide" key={index}>
-                    <div className="complete-image-wrapper">
-                        <img src={item.thumbnail} alt={item.title} />
-                        <div className="complete-play-overlay">
-                        <FontAwesomeIcon icon={faCirclePlay}/>
+            <div className='complete-dong-header'>
+                <div className='complete-dong-link'>
+                    <ul>
+                        <li>
+                            <span>Completed</span> Series
+                            <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
+                        </li>
+                    </ul>
+                </div>
+            </div>     
+            <div className='complete-dong-body'>
+                <div className='complete-banner-grid'>
+                    {currentItems.map((item, index) => (
+                        <div className="complete-donghua-slide" key={index}>
+                            <div className="complete-image-wrapper" onClick={() => handleDetail(item)}>
+                                <img src={item.image || item.thumbnail} alt={item.title} />
+                                <div className="complete-play-overlay">
+                                    <FontAwesomeIcon icon={faCirclePlay}/>
+                                </div>
+                                <p className='complete-donghua-episode'>Ep {item.episodesCount || item.episode || "?"}</p>
+                            </div>
+                            <a className="complete-donghua-title" onClick={() => handleDetail(item)}>
+                                <p>{item.title}</p>
+                            </a>
                         </div>
-                        <p className='complete-donghua-episode'>Ep {item.episodesCount || "?"}</p>
-                    </div>
-                    <a href='#' className="complete-donghua-title"><p>{item.title}</p></a>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
 
-            {/* Pagination Button */}
-            <div className="complete-btn-ViewPage">
-            {!viewAll ? (
-                <>
-                <button onClick={handlePrev} disabled={currentPage === 1}>Prev</button>
-                <button onClick={handleNext} disabled={currentPage === totalPage}>Next</button>
-                <button onClick={handleViewAll}>View All</button>
-                </>
-            ) : (
-                <button onClick={handleCloseViewAll}>Close</button>
-            )}
+                <div className="complete-btn-ViewPage">
+                    {!viewAll ? (
+                        <>
+                            <button onClick={handlePrev} disabled={currentPage === 1}>Prev</button>
+                            <button onClick={handleNext} disabled={currentPage === totalPage}>Next</button>
+                            <button onClick={handleViewAll}>View All</button>
+                        </>
+                    ) : (
+                        <button onClick={handleCloseViewAll}>Close</button>
+                    )}
+                </div>
             </div>
-        </div>
         </section>
     );
 }

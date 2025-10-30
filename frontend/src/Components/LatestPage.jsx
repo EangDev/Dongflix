@@ -1,63 +1,31 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import './style/HomePageStyle.css';
 import './style/LatestPageStyle.css';
-import loadingImg from '../Assets/loading.gif'
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
 
-function LatestDonghuaPage() {
-  const [donghuaList, setDonghuaList] = useState([]);
-  const [loading, setLoading] = useState(true);
+function LatestDonghuaPage({ data }) {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
-  
   const ITEM_PER_PAGE = 20;
 
-  // Fetch from backend
-  useEffect(() => {
-    async function fetchDonghua() {
-      try {
-        const res = await fetch('http://127.0.0.1:8001/lucifer');
-        const data = await res.json();
-        setDonghuaList(data.data || []);
-      } catch (err) {
-        console.error('Failed to fetch:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const latestDonghua = data.filter(item => item.category === "latest");
 
-    fetchDonghua();
-  }, []);
-
-  if (loading) 
-    return(
-      <div className='loading'>
-        <img src={loadingImg} alt="Loading..." />
-        <p className='loading-text'>Loading...</p>
-      </div>
-    )
-
-    //Pagination Logic
   const indexOfLast = currentPage * ITEM_PER_PAGE;
   const indexOfFirst = (currentPage - 1) * ITEM_PER_PAGE;
-  const currentItems = viewAll ? donghuaList : donghuaList.slice(indexOfFirst, indexOfLast);
-  const totalPage = Math.ceil(donghuaList.length / ITEM_PER_PAGE);
-    
-  const handleNext = () => {
-    if(currentPage < totalPage) setCurrentPage(prev => prev + 1);
-  }
+  const currentItems = viewAll ? latestDonghua : latestDonghua.slice(indexOfFirst, indexOfLast);
+  const totalPage = Math.ceil(latestDonghua.length / ITEM_PER_PAGE);
 
-  const handlePrev = () => {
-    if(currentPage > 1) setCurrentPage(prev => prev - 1);
-  }
-
+  const handleNext = () => { if (currentPage < totalPage) setCurrentPage(prev => prev + 1); };
+  const handlePrev = () => { if (currentPage > 1) setCurrentPage(prev => prev - 1); };
   const handleViewAll = () => setViewAll(true);
+  const handleCloseViewAll = () => { setViewAll(false); setCurrentPage(1); };
 
-  const handleCloseViewAll = () => {
-    setViewAll(false);
-    setCurrentPage(1);
+  const handleDetail = (item) => {
+    if (!item.link) return alert("Video URL not available for this anime!");
+    navigate(`/watch?url=${encodeURIComponent(item.link)}`);
   };
 
   return (
@@ -66,32 +34,30 @@ function LatestDonghuaPage() {
         <div className='latest-update-link'>
           <ul>
             <li>
-              <a href="#">
-                <span>Latest</span> Release
-              </a>
+              <span>Latest</span> Release
               <FontAwesomeIcon icon={faChevronRight} color='#ccc' />
             </li>
           </ul>
         </div>
       </div>     
       <div className='latest-update-body'>
-        {/* Anime grid */}
         <div className='latest-banner-grid'>
           {currentItems.map((item, index) => (
             <div className="donghua-slide" key={index}>
-              <div className="image-wrapper">
-                <img src={item.image} alt={item.title} />
+              <div className="image-wrapper" onClick={() => handleDetail(item)}>
+                <img src={item.image || item.thumbnail} alt={item.title} />
                 <div className="play-overlay">
                   <FontAwesomeIcon icon={faCirclePlay}/>
                 </div>
-                <p className='donghua-episode'>Ep {item.episode || "?"}</p>
+                <p className='donghua-episode'>Ep {item.episode || item.episodesCount || "?"}</p>
               </div>
-              <a href='#' className="donghua-title"><p>{item.title}</p></a>
+              <a className="donghua-title" onClick={() => handleDetail(item)}>
+                <p>{item.title}</p>
+              </a>
             </div>
           ))}
         </div>
 
-        {/* Pagination Button */}
         <div className="btn-ViewPage">
           {!viewAll ? (
             <>
@@ -108,4 +74,4 @@ function LatestDonghuaPage() {
   );
 }
 
-export default LatestDonghuaPage
+export default LatestDonghuaPage;
