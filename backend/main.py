@@ -12,6 +12,9 @@ import time
 CACHE = {"data": [], "timestamp": 0}
 CACHE_TTL = 600
 
+STREAM_CACHE = {}
+STREAM_CACHE_TTL = 600
+
 # Load environment variables
 load_dotenv()
 LUCIFER_URL = os.getenv("LUCIFER_URL")
@@ -108,6 +111,12 @@ def get_lucifer_home():
 
 @app.get("/api/stream")
 def get_stream(url: str):
+    now = time.time()
+
+    # ✅ Check if URL is already cached and still fresh
+    if url in STREAM_CACHE and now - STREAM_CACHE[url]["timestamp"] < STREAM_CACHE_TTL:
+        return STREAM_CACHE[url]["data"]
+
     headers = {"User-Agent": USER_AGENT}
     try:
         res = requests.get(url, headers=headers)
@@ -116,7 +125,7 @@ def get_stream(url: str):
         
         soup = BeautifulSoup(res.text, "html.parser")
         
-        # Find server links in the select dropdown (base64 encoded)
+        # --- Find server links in the select dropdown (base64 encoded) ---
         servers = {}
         select = soup.select_one("select.mirror")
         if select:
@@ -133,22 +142,135 @@ def get_stream(url: str):
                         iframe = iframe_soup.find("iframe")
                         if iframe and iframe.get("src"):
                             servers[server_name] = iframe.get("src")
-                    except Exception as e:
+                    except Exception:
                         continue
         
+        # --- Fallback: try to get any iframe directly ---
         if not servers:
-            # fallback: try to get any iframe directly from page
             iframe = soup.find("iframe")
             if iframe and iframe.get("src"):
                 servers["default"] = iframe.get("src")
         
         if not servers:
             raise HTTPException(status_code=404, detail="No video servers found")
-        
-        return {"servers": servers}
+
+        # ✅ Store result in cache
+        result = {"servers": servers}
+        STREAM_CACHE[url] = {"data": result, "timestamp": now}
+        return result
 
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
+
+@app.get("/api/episodes")
+def get_episodes(url: str):
+    """
+    Fetch episode list for a given anime (Anime4i compatible)
+    """
+    headers = {"User-Agent": USER_AGENT}
+    res = requests.get(url, headers=headers)
+    if res.status_code != 200:
+        raise HTTPException(status_code=404, detail="Failed to load anime page")
+
+    soup = BeautifulSoup(res.text, "html.parser")
+
+    # Try to find episodes directly on the page
+    episode_items = soup.select("ul#episode_related li a, ul.episodelist li a")
+
+    # If still empty, try alternative layouts
+    if not episode_items:
+        episode_items = soup.select("div#episodes li a, div.episodelist a")
+
+    episodes = []
+    for ep in episode_items:
+        ep_url = ep.get("href")
+        text = ep.text.strip()
+
+        # Prefer explicit "Episode xxx" pattern
+        ep_match = re.search(r'[Ee]pisode\s*(\d+)', text)
+        if ep_match:
+            ep_number = ep_match.group(1)
+        else:
+            # fallback to the last number in the text
+            numbers = re.findall(r'\d+', text)
+            ep_number = numbers[-1] if numbers else text
+
+        if ep_url:
+            episodes.append({
+                "number": ep_number,
+                "url": ep_url
+            })
+
+    if not episodes:
+        raise HTTPException(status_code=404, detail="No episodes found")
+
+    # Sort by episode number (if numeric)
+    def parse_num(x):
+        try:
+            return int(x["number"])
+        except:
+            return 9999
+    episodes = sorted(episodes, key=parse_num)
+
+    return {"count": len(episodes), "episodes": episodes}
+
+@app.get("/api/details")
+def get_details(url: str):
+    """
+    Extract clean anime details: title, release date, posted by, and series name.
+    """
+    headers = {"User-Agent": USER_AGENT}
+    try:
+        res = requests.get(url, headers=headers)
+        if res.status_code != 200:
+            raise HTTPException(status_code=404, detail="Failed to load anime page")
+
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        # --- Title ---
+        # Prefer <h1> or site-specific title selector
+        title_tag = soup.find("h1") or soup.find("h2") or soup.find("h3")
+        raw_title = title_tag.get_text(strip=True) if title_tag else "Unknown Title"
+
+        # --- Clean series name ---
+        # Remove "Season", "Ep", episode numbers, or subtitles in brackets/parentheses
+        series = re.sub(
+            r"(?:Season|S\d+|Ep\s*\d+|Episode\s*\d+|\[\w+\]|\(.*?\))",
+            "",
+            raw_title,
+            flags=re.IGNORECASE
+        ).strip()
+
+        # --- Release date ---
+        release = None
+
+        # Try site-specific date selector
+        # Example: <span class="released">Jan 17, 2025</span>
+        release_tag = soup.find("span", class_=re.compile(r"release|released|date", re.IGNORECASE))
+        if release_tag:
+            release = release_tag.get_text(strip=True)
+
+        # Fallback: look for meta tag
+        if not release:
+            meta_date = soup.find("meta", {"property": "article:published_time"})
+            if meta_date and meta_date.get("content"):
+                release = meta_date["content"][:10]
+
+        # Final fallback
+        release = release or "Unknown"
+
+        # --- Posted by ---
+        posted_by = "Dongflix"
+
+        return {
+            "title": raw_title,
+            "releaseDate": release,
+            "postedBy": posted_by,
+            "series": series
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to extract details: {str(e)}")
 
 @app.get("/api/all")
 def get_all():

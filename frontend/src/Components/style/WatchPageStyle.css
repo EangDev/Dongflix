@@ -1,0 +1,342 @@
+:root {
+  --bg-mainBG: #000;
+  --bg-headerBG: #131313;
+  --bg-hoverBG: #0095c2;
+  --bg-activeBG: #00c3ff;
+  --bg-sliceBG: #bbefff;
+  --txt-color: #ccc;
+}
+
+/* --- Fonts --- */
+@font-face {
+  font-family: 'Rolam';
+  src: url(../../Assets/fonts/ROLAM-PersonalUse.otf);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+/* --- Global Styles --- */
+body {
+  margin: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-mainBG);
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+}
+/* --- Header --- */
+.watchpage-header-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 80px;
+  background-color: var(--bg-headerBG);
+}
+.watchpage-header-container
+.watchpage-logo-img {
+  position: absolute;
+  left: 30px;
+}
+.watchpage-header-container
+.watchpage-logo-img img {
+  width: 180px;
+  height: 60px;
+  padding: 10px;
+  border-radius: 15px;
+}
+
+/* --- Search Box --- */
+.watchpage-header-container
+.watchpage-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 280px;
+}
+.watchpage-header-container
+.watchpage-search-box input {
+  width: 280px;
+  height: 35px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: none;
+  color: var(--txt-color);
+  font-weight: bold;
+}
+.watchpage-header-container
+.watchpage-search-box input::placeholder {
+  color: var(--txt-color);
+}
+.watchpage-header-container
+#watchpage-btn-search {
+  border: 0;
+  border-radius: 55px;
+  background: var(--bg-hoverBG);
+  cursor: pointer;
+  padding: 9px 14px;
+  transition: all 0.25s ease;
+}
+.watchpage-header-container
+#watchpage-btn-search:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.05);
+  .Magnifying{color: #fff;}
+}
+.watchpage-header-container
+.watchpage-magnifying {
+  color: var(--txt-color);
+}
+
+/* --- Menu --- */
+.watchpage-header-container
+.watchpage-menu-text ul {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* align all menu items and sign-in in the same row */
+  gap: 20px; /* spacing between menu items */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Each menu item with icon above text */
+.watchpage-header-container
+.watchpage-menu-text ul li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px; /* space between icon and text */
+}
+
+/* Links inside menu */
+.watchpage-header-container
+.watchpage-menu-text ul li a {
+  display: flex;
+  flex-direction: column; /* icon above text */
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--txt-color);
+  font-weight: bold;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+}
+.watchpage-header-container
+.watchpage-menu-text ul li a:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  transform: scale(1.05);
+}
+.watchpage-header-container
+#watchpage-btn-signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.25s ease;
+  background-color: transparent;
+  color: var(--txt-color);
+  border: 0;
+}
+.watchpage-header-container
+#watchpage-btn-signin:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+}
+
+/*Anime detail. Title, Release Date, Posted by, Series*/
+.anime-detail-container{
+  display: flex;
+  flex: 1;
+  width: 100%;
+  justify-content: left;
+  align-items: center;
+  height: 80px;
+  padding: 10px 0;
+  margin-top: 50px;
+  border-radius: 15px;
+  background-color: var(--bg-headerBG);
+}
+.anime-detail-container
+.anime-detail-bg{
+  text-align: left;
+  padding: 0 30px;
+}
+.anime-title{
+  font-family: 'Space Mono', sans-serif;
+  color: var(--txt-color);
+}
+.anime-release-date p{
+  text-decoration: none;
+  color: var(--txt-color);
+  text-align: left;
+  font-family: 'Space Mono', sans-serif;
+}
+.anime-release-date a{
+  text-decoration: none;
+  color: var(--txt-color);
+  text-align: left;
+  font-family: 'Space Mono', sans-serif;
+  font-weight: bold;
+}
+
+.anime-release-date a:hover{
+  color: var(--bg-hoverBG);
+  transition: all 0.2s ease;
+}
+
+.watch-page {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 25px;
+  gap: 25px;
+  background: #0e0e0e;
+  color: #fff;
+}
+
+/* Player */
+.player-section {
+  flex: 3;
+}
+
+.player-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.player-container iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* --- Episode Sidebar --- */
+/* Keep scrolling but hide scrollbar */
+.episode-sidebar {
+  flex: 1;
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 15px;
+  max-height: 70vh;
+  overflow-y: scroll;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+
+  /* Hide scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.episode-sidebar::-webkit-scrollbar {
+  width: 0px;
+}
+/* Episode controls: dropdown + search */
+.episode-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.episode-controls select {
+  width: 125px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  font-size: 0.7rem;
+  font-family: 'Space Mono', sans-serif;
+}
+
+.episode-controls input {
+  flex: 1;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  font-size: 0.7rem;
+  font-family: 'Space Mono', sans-serif;
+}
+
+.episode-sidebar h3 {
+  font-size: 1.1rem;
+  border-bottom: 2px solid #ff4747;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  color: #fff;
+  font-family: 'Space Mono', sans-serif;
+  text-transform: uppercase;
+}
+
+.episode-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.episode-item {
+  background: #222;
+  color: var(--txt-color);
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  border: 2px solid transparent;
+}
+
+.episode-item:hover {
+  background: var(--bg-hoverBG);
+  transform: scale(1.1);
+}
+
+/* Active episode highlight */
+.episode-item.active {
+  background: var(--bg-hoverBG);
+  border: 2px solid #ff7575;
+  color: var(--txt-color);
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .watch-page {
+    flex-direction: column;
+  }
+
+  .episode-sidebar {
+    max-height: none;
+    width: 100%;
+  }
+
+  .episode-list {
+    justify-content: flex-start;
+  }
+}
