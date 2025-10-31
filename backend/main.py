@@ -216,9 +216,7 @@ def get_episodes(url: str):
 
 @app.get("/api/details")
 def get_details(url: str):
-    """
-    Extract clean anime details: title, release date, posted by, and series name.
-    """
+    
     headers = {"User-Agent": USER_AGENT}
     try:
         res = requests.get(url, headers=headers)
@@ -226,7 +224,7 @@ def get_details(url: str):
             raise HTTPException(status_code=404, detail="Failed to load anime page")
 
         soup = BeautifulSoup(res.text, "html.parser")
-
+        
         # --- Title ---
         # Prefer <h1> or site-specific title selector
         title_tag = soup.find("h1") or soup.find("h2") or soup.find("h3")
@@ -262,11 +260,34 @@ def get_details(url: str):
         # --- Posted by ---
         posted_by = "Dongflix"
 
+        # --- Description ---
+        desc_tag = soup.find("div", class_=re.compile(r"desc", re.IGNORECASE))
+
+        if desc_tag:
+            # Find all <p> tags inside the desc div
+            p_tags = desc_tag.find_all("p", class_=re.compile(r"mb-2|last:mb-0", re.IGNORECASE))
+            if p_tags:
+                # Join all paragraphs into a single description
+                description = "\n\n".join(p.get_text(strip=True) for p in p_tags)
+            else:
+                description = "No description available."
+        else:
+            description = "No description available."
+
+        # Fallback to meta description if nothing found
+        if not description:
+            meta_desc = soup.find("meta", {"name": "description"})
+            if meta_desc and meta_desc.get("content"):
+                description = meta_desc["content"]
+
+        description = description or "No description available."
+        
         return {
             "title": raw_title,
             "releaseDate": release,
             "postedBy": posted_by,
-            "series": series
+            "series": series,
+            "description": description
         }
 
     except Exception as e:

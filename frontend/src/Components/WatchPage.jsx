@@ -12,11 +12,14 @@ import logo from '../Assets/mylogo.png';
 function WatchPage() {
   const [params] = useSearchParams();
   const initialUrl = params.get("url");
-  const [animeDetails, setAnimeDetails] = useState({
+  const initialImage = params.get("image");
+  const [titleDetails, settitleDetails] = useState({
     title: "",
     releaseDate: "",
     postedBy: "Dongflix",
     series: "",
+    image: initialImage || "",
+    description: ""
   });
 
   const [servers, setServers] = useState({});
@@ -27,9 +30,14 @@ function WatchPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
   const EPISODES_PER_PAGE = 30;
   const navigate = useNavigate();
 
+  const descriptionPreview = titleDetails.description?.slice(0, 200);
+  const fullDescription = titleDetails.description;
+  
   // --- Fetch episodes list on initial load ---
   useEffect(() => {
     if (!initialUrl) return;
@@ -50,10 +58,18 @@ function WatchPage() {
       })
       .catch(console.error);
 
-    // Fetch anime details
+    // Fetch title details
     fetch(`http://127.0.0.1:8001/api/details?url=${encodeURIComponent(initialUrl)}`)
       .then(res => res.json())
-      .then(data => setAnimeDetails(data))
+      .then(data => {
+        if (data.url === initialUrl || data.title) {
+          settitleDetails(prev => ({
+            ...prev,
+            ...data,
+            image: data.image || prev.image // keep initial image if API has none
+          }));
+        }
+      })
       .catch(console.error);
 
     // Fetch default stream
@@ -67,7 +83,6 @@ function WatchPage() {
       })
       .catch(console.error);
   }, [initialUrl]);
-
 
   // --- Filter and paginate episodes ---
   const filteredEpisodes = useMemo(() => {
@@ -159,17 +174,18 @@ function WatchPage() {
           </ul>
         </div>
       </div>
-
-      <div className="anime-detail-container">
-        <div className="anime-detail-bg">
-          <div className="anime-title">
-            <h3>{animeDetails.title || "Loading..."}</h3>
+      
+      {/*----TITLE HEADER----*/}
+      <div className="title-detail-container">
+        <div className="title-detail-bg">
+          <div className="title-title">
+            <h3>{titleDetails.title || "Loading..."}</h3>
           </div>
-          <div className="anime-release-date">
+          <div className="title-release-date">
             <p>
-              Released on <span>{animeDetails.releaseDate}</span> . Posted by:{" "}
-              <a href="">{animeDetails.postedBy}</a> . Series:{" "} 
-              <a href="">{animeDetails.series}</a>
+              Released on <span>{titleDetails.releaseDate}</span> . Posted by:{" "}
+              <a href="">{titleDetails.postedBy}</a> . Series:{" "} 
+              <a href="">{titleDetails.series}</a>
             </p>
           </div>
         </div>
@@ -184,7 +200,7 @@ function WatchPage() {
                 src={currentServer}
                 frameBorder="0"
                 allowFullScreen
-                title="Anime Player"
+                title="title Player"
               />
             ) : (
               <p>Loading video...</p>
@@ -192,7 +208,7 @@ function WatchPage() {
           </div>
         </div>
         
-        
+
         {/* ---- EPISODE SIDEBAR ---- */}
         <div className="episode-sidebar">
           <h3>Available Episodes</h3>
@@ -237,6 +253,88 @@ function WatchPage() {
                 </button>
               );
             })}
+          </div>
+        </div>
+      </div>
+
+      {/*---DETAIL OF DONGHUA---*/}
+      <div className="donghua-detail-container">
+        <div className="donghua-detail-header">
+          {/* Left: Logo */}
+          <div className="donghua-detail-logo">
+            <img src={titleDetails.image || logo} alt={titleDetails.title} />
+            <button id="btn-bookmark">Bookmark</button>
+            <p>Please Login to use this Bookmark</p>
+            <p>Followed 196 people</p>
+          </div>
+
+          {/* Right: Title + Status */}
+          <div className="donghua-detail-right">
+            <div className="donghua-detail-title">
+              <h3 className="big-titles">{titleDetails.title || "Loading..."}</h3>
+              <p className="small-titles">{titleDetails.title || "Subtitle"}</p>
+              <p className="small-titles-chinese">{titleDetails.titleChinese || "Chinese Title"}</p>
+            </div>
+
+            {/* Status/details under title */}
+            <div className="donghua-detail-onstatus">
+              <ul>
+                <li>Status: {titleDetails.status || "Ongoing"}</li>
+                <li>Release: {titleDetails.releaseDate || "2023"}</li>
+                <li>Type: {titleDetails.type || "ONA"}</li>
+              </ul>
+              <ul>
+                <li>Studio: {titleDetails.studio || "Sparkly Key Studio"}</li>
+                <li>Duration: {titleDetails.duration || "20 min per ep"}</li>
+                <li>Episodes: {titleDetails.episodes || 104}</li>
+              </ul>
+            </div>
+
+            <div className="donghua-detail-movietype">
+              <button>Action</button>
+              <button>Adventure</button>
+              <button>Fantasy</button>
+              <button>Martial Arts</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="donghua-detail-description">
+          {(showFullDescription ? fullDescription : descriptionPreview || "")
+            .split("\n\n")
+            .map((para, idx) => para && <p key={idx}>{para}</p>)
+          }
+
+          {fullDescription && (
+            <button
+              id="btn-toggle-description"
+              onClick={() => setShowFullDescription(!showFullDescription)}
+            >
+              {showFullDescription ? "Hide" : "More"}
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/*----COMMENTS----*/}
+      <div className="watch-comments-container">
+        <div className="watch-comments-header">
+          <p>Please{" "}
+            <button id="watch-btn-Login">Login</button>{" "}
+              to leave comment.
+          </p>
+        </div>
+        <div className="watch-comments-count-header">
+          <div className="comments-count">
+             <p>10 Comments</p>
+          </div>
+          <div className="view-comment-options">
+             <p>Sort Comments</p>
+             <select>
+              <option value="newest-comments">Newest Comments</option>
+              <option value="newest-comments">Oldest Comments</option>
+              <option value="newest-comments">TopVotes Comments</option>
+             </select>
           </div>
         </div>
       </div>

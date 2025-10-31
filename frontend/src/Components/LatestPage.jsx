@@ -25,7 +25,7 @@ function LatestDonghuaPage({ data }) {
 
   const handleDetail = (item) => {
     if (!item.link) return alert("Video URL not available for this anime!");
-    navigate(`/watch?url=${encodeURIComponent(item.link)}`);
+    navigate(`/watch?url=${encodeURIComponent(item.link)}&image=${encodeURIComponent(item.image || item.thumbnail)}`);
   };
 
   return (

@@ -43,7 +43,6 @@ body {
   padding: 10px;
   border-radius: 15px;
 }
-
 /* --- Search Box --- */
 .watchpage-header-container
 .watchpage-search-box {
@@ -154,8 +153,30 @@ body {
   color: #fff;
 }
 
-/*Anime detail. Title, Release Date, Posted by, Series*/
-.anime-detail-container{
+/*watch-btn-login to leave comments*/
+#watch-btn-Login{
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Space Mono', sans-serif;
+  letter-spacing: 1px;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.25s ease;
+  background-color: var(--bg-hoverBG);
+  color: var(--txt-color);
+  border: 0;
+  gap: 15px;
+}
+#watch-btn-Login:hover{
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+}
+
+/*title detail. Title, Release Date, Posted by, Series*/
+.title-detail-container{
   display: flex;
   flex: 1;
   width: 100%;
@@ -167,34 +188,32 @@ body {
   border-radius: 15px;
   background-color: var(--bg-headerBG);
 }
-.anime-detail-container
-.anime-detail-bg{
+.title-detail-container
+.title-detail-bg{
   text-align: left;
   padding: 0 30px;
 }
-.anime-title{
+.title-title{
   font-family: 'Space Mono', sans-serif;
   color: var(--txt-color);
 }
-.anime-release-date p{
+.title-release-date p{
   text-decoration: none;
   color: var(--txt-color);
   text-align: left;
   font-family: 'Space Mono', sans-serif;
 }
-.anime-release-date a{
+.title-release-date a{
   text-decoration: none;
   color: var(--txt-color);
   text-align: left;
   font-family: 'Space Mono', sans-serif;
   font-weight: bold;
 }
-
-.anime-release-date a:hover{
+.title-release-date a:hover{
   color: var(--bg-hoverBG);
   transition: all 0.2s ease;
 }
-
 .watch-page {
   display: flex;
   flex-direction: row;
@@ -220,7 +239,6 @@ body {
   background: #000;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
-
 .player-container iframe {
   position: absolute;
   top: 0; left: 0;
@@ -244,7 +262,6 @@ body {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
-
 .episode-sidebar::-webkit-scrollbar {
   width: 0px;
 }
@@ -255,7 +272,6 @@ body {
   gap: 10px;
   margin-bottom: 10px;
 }
-
 .episode-controls select {
   width: 125px;
   padding: 5px;
@@ -266,7 +282,6 @@ body {
   font-size: 0.7rem;
   font-family: 'Space Mono', sans-serif;
 }
-
 .episode-controls input {
   flex: 1;
   padding: 5px;
@@ -277,7 +292,6 @@ body {
   font-size: 0.7rem;
   font-family: 'Space Mono', sans-serif;
 }
-
 .episode-sidebar h3 {
   font-size: 1.1rem;
   border-bottom: 2px solid #ff4747;
@@ -288,14 +302,12 @@ body {
   font-family: 'Space Mono', sans-serif;
   text-transform: uppercase;
 }
-
 .episode-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
 }
-
 .episode-item {
   background: #222;
   color: var(--txt-color);
@@ -311,7 +323,6 @@ body {
   transition: all 0.25s ease;
   border: 2px solid transparent;
 }
-
 .episode-item:hover {
   background: var(--bg-hoverBG);
   transform: scale(1.1);
@@ -323,6 +334,321 @@ body {
   border: 2px solid #ff7575;
   color: var(--txt-color);
   transform: scale(1.05);
+}
+
+/* --- Comments Section --- */
+.watch-comments-container {
+  margin-top: 25px;
+  background-color: #1a1a1a;
+  border-radius: 10px;
+  padding: 15px 20px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+}
+
+/* --- Header that tells user to login --- */
+.watch-comments-header {
+  background-color: var(--bg-headerBG);
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  margin-bottom: 15px;
+  color: #bbb;
+}
+
+.watch-comments-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* --- Login Button inside header --- */
+#watch-btn-Login {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin: 0 4px;
+}
+
+#watch-btn-Login:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.05);
+}
+
+/* --- Comments Count + Sorting Section --- */
+.watch-comments-count-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #131313;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 5px;
+}
+
+.comments-count p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--bg-activeBG);
+}
+
+.view-comment-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-comment-options p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--txt-color);
+}
+
+.view-comment-options select {
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  font-size: 0.8rem;
+  font-family: 'Space Mono', sans-serif;
+  transition: all 0.25s ease;
+}
+
+.view-comment-options select:hover {
+  border-color: var(--bg-hoverBG);
+  background-color: #262626;
+}
+
+/* --- DONGHUA DETAIL PAGE --- */
+.donghua-detail-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #0e0e0e;
+  border-radius: 15px;
+  padding: 25px;
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  margin: 50px auto;
+  width: 90%;
+  max-width: 1100px;
+}
+
+.donghua-detail-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+/* --- Left side: poster and bookmark --- */
+.donghua-detail-logo {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #131313;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.donghua-detail-logo img {
+  width: 200px;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+#btn-bookmark {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: 100%;
+}
+
+#btn-bookmark:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.05);
+}
+
+.donghua-detail-logo p {
+  margin: 6px 0;
+  font-size: 0.8rem;
+  color: #aaa;
+  text-align: center;
+}
+
+/* --- Right side: title, info, and categories --- */
+.donghua-detail-title {
+  flex: 1;
+}
+
+.big-titles {
+  font-size: 1.35rem;
+  color: #fff;
+  font-family: 'Space Mono', sans-serif;
+  margin-bottom: 5px;
+}
+
+.small-titles {
+  color: #bbb;
+  font-size: 0.9rem;
+}
+
+.small-titles-chinese {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+/* --- Status and info lists --- */
+.donghua-detail-onstatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  font-size: 0.9rem;
+  margin: 15px 0;
+}
+
+.donghua-detail-onstatus ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.donghua-detail-onstatus li {
+  padding: 4px 0;
+  color: var(--txt-color);
+}
+
+/* --- Category buttons (Action, Fantasy, etc.) --- */
+.donghua-detail-movietype {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.donghua-detail-movietype button {
+  background-color: transparent;
+  color: var(--bg-activeBG);
+  border: 1px solid var(--bg-activeBG);
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+
+.donghua-detail-movietype button:hover {
+  background-color: var(--bg-activeBG);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* --- Description section --- */
+.donghua-detail-description {
+  margin-top: 20px;
+  background-color: #131313;
+  padding: 15px 20px;
+  border-radius: 10px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  color: #ccc;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Smooth expand / collapse animation */
+.donghua-detail-description p {
+  max-height: 140px;      
+  overflow: hidden;
+  transition: max-height 0.6s ease, opacity 0.4s ease;
+  opacity: 0.9;
+}
+
+.donghua-detail-description.show p {
+  max-height: 800px;      
+  opacity: 1;
+}
+
+/* --- Toggle button --- */
+#btn-toggle-description {
+  background-color: transparent;
+  border: none;
+  color: #00c3ff;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+#btn-toggle-description:hover {
+  color: #00eaff;
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+
+/* --- Responsive layout --- */
+@media (max-width: 900px) {
+  .donghua-detail-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .donghua-detail-logo {
+    width: 100%;
+    flex: unset;
+  }
+
+  .donghua-detail-title,
+  .donghua-detail-onstatus {
+    text-align: center;
+  }
+
+  .donghua-detail-onstatus {
+    justify-content: center;
+  }
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .watch-comments-count-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .view-comment-options {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .view-comment-options select {
+    width: 60%;
+  }
 }
 
 /* Responsive */
