@@ -94,7 +94,7 @@ function HomePage() {
 
       <div className="container-1">
         <div className="animated-text">
-          <div className="animation-txt">Welcome to DongFlix ^_____^ ...</div>
+          <div className="animation-txt">💖 Welcome to DongFlix — Your ultimate world of donghua! From the fiery battles of Battle Through the Heavens ⚔️ to the mystical realms of Soul Land 💥 and Perfect World 🌏, get ready to embark on endless adventures 🌈 that will leave you inspired!</div>
         </div>
       </div>
 

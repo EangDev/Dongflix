@@ -7,8 +7,8 @@ import os
 from urllib.parse import urlparse
 import re
 import base64
-
 import time
+
 CACHE = {"data": [], "timestamp": 0}
 CACHE_TTL = 600
 
@@ -216,7 +216,6 @@ def get_episodes(url: str):
 
 @app.get("/api/details")
 def get_details(url: str):
-    
     headers = {"User-Agent": USER_AGENT}
     try:
         res = requests.get(url, headers=headers)
@@ -224,14 +223,12 @@ def get_details(url: str):
             raise HTTPException(status_code=404, detail="Failed to load anime page")
 
         soup = BeautifulSoup(res.text, "html.parser")
-        
-        # --- Title ---
-        # Prefer <h1> or site-specific title selector
+
+        # --- Title extraction ---
         title_tag = soup.find("h1") or soup.find("h2") or soup.find("h3")
         raw_title = title_tag.get_text(strip=True) if title_tag else "Unknown Title"
 
-        # --- Clean series name ---
-        # Remove "Season", "Ep", episode numbers, or subtitles in brackets/parentheses
+        # --- Clean up the title ---
         series = re.sub(
             r"(?:Season|S\d+|Ep\s*\d+|Episode\s*\d+|\[\w+\]|\(.*?\))",
             "",
@@ -239,55 +236,84 @@ def get_details(url: str):
             flags=re.IGNORECASE
         ).strip()
 
-        # --- Release date ---
-        release = None
+        # --- Info extraction (status, release, studio, etc.) ---
+        info_section = soup.select_one("div.info-content, div.infotable, div.spe, div.infodesc")
+        details = {}
 
-        # Try site-specific date selector
-        # Example: <span class="released">Jan 17, 2025</span>
-        release_tag = soup.find("span", class_=re.compile(r"release|released|date", re.IGNORECASE))
-        if release_tag:
-            release = release_tag.get_text(strip=True)
+        if info_section:
+            for item in info_section.find_all(["p", "span", "li"]):
+                text = item.get_text(" ", strip=True)
+                if ":" in text:
+                    key, val = text.split(":", 1)
+                    details[key.strip().capitalize()] = val.strip()
 
-        # Fallback: look for meta tag
-        if not release:
-            meta_date = soup.find("meta", {"property": "article:published_time"})
-            if meta_date and meta_date.get("content"):
-                release = meta_date["content"][:10]
+        # --- Alternative Title ---
+        alt_title = (
+            details.get("Alternative title")
+            or details.get("Other name")
+            or details.get("Synonyms")
+            or details.get("Also known as")
+            or details.get("Chinese name")
+            or "None"
+        )
 
-        # Final fallback
-        release = release or "Unknown"
+        # --- Release Date ---
+        release = (
+            details.get("Release")
+            or details.get("Released")
+            or details.get("Aired")
+            or "Unknown"
+        )
 
-        # --- Posted by ---
-        posted_by = "Dongflix"
+        # --- Studio ---
+        studio = details.get("Studio") or "Unknown Studio"
+
+        # --- Type ---
+        anime_type = details.get("Type") or "Unknown Type"
+
+        # --- Episodes ---
+        episodes = details.get("Episodes") or "N/A"
+
+        # --- Duration ---
+        duration = details.get("Duration") or "Unknown Duration"
+
+        # --- Genres from Anime4i ---
+        genres = []
+        genre_section = soup.select_one("div.genxed")  # <-- Anime4i’s genre container
+        if genre_section:
+            genres = [a.get_text(strip=True) for a in genre_section.find_all("a", rel="tag")]
+        else:
+            # fallback: look for text like "Genre: Action, Adventure"
+            genre_text = None
+            for k, v in details.items():
+                if "Genre" in k:
+                    genre_text = v
+                    break
+            if genre_text:
+                genres = [g.strip() for g in re.split(r"[,/]", genre_text)]
+
+        if not genres:
+            genres = ["Unknown"]
 
         # --- Description ---
-        desc_tag = soup.find("div", class_=re.compile(r"desc", re.IGNORECASE))
-
+        desc_tag = soup.find("div", class_=re.compile(r"desc|synopsis|summary", re.IGNORECASE))
         if desc_tag:
-            # Find all <p> tags inside the desc div
-            p_tags = desc_tag.find_all("p", class_=re.compile(r"mb-2|last:mb-0", re.IGNORECASE))
-            if p_tags:
-                # Join all paragraphs into a single description
-                description = "\n\n".join(p.get_text(strip=True) for p in p_tags)
-            else:
-                description = "No description available."
+            description = " ".join(desc_tag.stripped_strings)
         else:
-            description = "No description available."
-
-        # Fallback to meta description if nothing found
-        if not description:
             meta_desc = soup.find("meta", {"name": "description"})
-            if meta_desc and meta_desc.get("content"):
-                description = meta_desc["content"]
+            description = meta_desc["content"] if meta_desc else "No description available."
 
-        description = description or "No description available."
-        
         return {
             "title": raw_title,
-            "releaseDate": release,
-            "postedBy": posted_by,
             "series": series,
-            "description": description
+            "alternativeTitle": alt_title,
+            "releaseDate": release,
+            "studio": studio,
+            "type": anime_type,
+            "episodes": episodes,
+            "duration": duration,
+            "description": description,
+            "genres": genres,
         }
 
     except Exception as e:

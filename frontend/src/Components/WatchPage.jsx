@@ -174,7 +174,11 @@ function WatchPage() {
           </ul>
         </div>
       </div>
-      
+      <div className="container-1">
+        <div className="animated-text">
+          <div className="animation-txt">💖 Welcome to DongFlix — Your ultimate world of donghua! From the fiery battles of Battle Through the Heavens ⚔️ to the mystical realms of Soul Land 💥 and Perfect World 🌏, get ready to embark on endless adventures 🌈 that will leave you inspired!</div>
+        </div>
+      </div>
       {/*----TITLE HEADER----*/}
       <div className="title-detail-container">
         <div className="title-detail-bg">
@@ -273,7 +277,6 @@ function WatchPage() {
             <div className="donghua-detail-title">
               <h3 className="big-titles">{titleDetails.title || "Loading..."}</h3>
               <p className="small-titles">{titleDetails.title || "Subtitle"}</p>
-              <p className="small-titles-chinese">{titleDetails.titleChinese || "Chinese Title"}</p>
             </div>
 
             {/* Status/details under title */}
@@ -286,15 +289,18 @@ function WatchPage() {
               <ul>
                 <li>Studio: {titleDetails.studio || "Sparkly Key Studio"}</li>
                 <li>Duration: {titleDetails.duration || "20 min per ep"}</li>
-                <li>Episodes: {titleDetails.episodes || 104}</li>
+                <li>Episodes: {titleDetails.episodes || episodes.length || 104}</li>
               </ul>
             </div>
-
+            
             <div className="donghua-detail-movietype">
-              <button>Action</button>
-              <button>Adventure</button>
-              <button>Fantasy</button>
-              <button>Martial Arts</button>
+              {titleDetails.genres?.length > 0 ? (
+                titleDetails.genres.map((genre, index) => (
+                  <button key={index}>{genre}</button>
+                ))
+              ) : (
+                <button>Unknown</button>
+              )}
             </div>
           </div>
         </div>
