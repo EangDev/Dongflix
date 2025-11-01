@@ -163,7 +163,7 @@ function WatchPage() {
             </li>
             <li>
               <FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" />
-              <a href="#">Contact Us</a>
+              <Link to="/contact">Contact Us</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" />

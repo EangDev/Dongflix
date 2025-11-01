@@ -116,9 +116,9 @@ function AboutPage() {
                     <ul>
                         <li><FontAwesomeIcon icon={faHouse} color="#ccc" size="lg" /><Link to="/">Home</Link></li>
                         <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg" /><Link to="/about">About</Link></li>
-                        <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/">Contact</Link></li>
-                        <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><a href="#">Support Us</a></li>
-                        <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><a href="#">Hide ADS</a></li>
+                        <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
+                        <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><Link to="/support">Support Us</Link></li>
+                        <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide Ads</Link></li>
                         <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /><button id="about-btn-signin">Sign in</button></li>
                     </ul>
                 </div>
