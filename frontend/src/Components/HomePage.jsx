@@ -116,7 +116,7 @@ function HomePage() {
             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/><Link to="/contact">Comtact</Link></li>
             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg"/><Link to="/support">Support Us</Link></li>
             <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><Link to="/hide">Hide ADS</Link></li>
-            <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg"/><button id="homepage-btn-signin">Sign in</button></li>
+            <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg"/><Link to="/login">Sign In</Link></li>
           </ul>
         </div>
       </div>

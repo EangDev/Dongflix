@@ -5,6 +5,7 @@ import WatchPage from "./Components/WatchPage";
 import AboutPage from "./Components/AboutPage";
 import ContactPage from "./Components/ContactPage";
 import SupportPage from "./Components/SupportPage";
+import LoginPage from "./Components/LoginPage";
 
 function App(){
   return(
@@ -15,6 +16,7 @@ function App(){
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </Router>
   )

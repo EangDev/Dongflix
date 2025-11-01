@@ -1,0 +1,380 @@
+:root {
+  --bg-mainBG: #000;
+  --bg-headerBG: #131313;
+  --bg-hoverBG: #0095c2;
+  --bg-activeBG: #00c3ff;
+  --bg-sliceBG: #bbefff;
+  --txt-color: #ccc;
+}
+
+@font-face {
+  font-family: 'Rolam';
+  src: url(../../Assets/fonts/ROLAM-PersonalUse.otf);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-mainBG);
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+}
+
+/* --- Loading Overlay --- */
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 195, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+.loading img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  animation: spin 1.5s linear infinite;
+}
+
+.loading-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #00c3ff;
+  margin-top: 15px;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Header --- */
+.login-header-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 80px;
+  background-color: var(--bg-headerBG);
+}
+
+.login-logo-img {
+  position: absolute;
+  left: 30px;
+}
+
+.login-logo-img img {
+  width: 180px;
+  height: 60px;
+  padding: 10px;
+  border-radius: 15px;
+}
+
+/* --- Search Box --- */
+.login-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 280px;
+  position: relative;
+}
+
+.login-search-box input {
+  width: 280px;
+  height: 35px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: none;
+  color: var(--txt-color);
+  font-weight: bold;
+}
+
+.login-search-box input::placeholder {
+  color: var(--txt-color);
+}
+
+#login-btn-search {
+  border: 0;
+  border-radius: 55px;
+  background: var(--bg-hoverBG);
+  cursor: pointer;
+  padding: 9px 14px;
+  transition: all 0.25s ease;
+}
+
+#login-btn-search:hover {
+  background-color: var(--bg-activeBG);
+  transform: scale(1.05);
+}
+
+.login-Magnifying {
+  color: var(--txt-color);
+}
+
+/* --- Search Suggestions Dropdown --- */
+.login-search-suggestions {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-10%);
+  width: 280px;
+  background-color: var(--bg-headerBG);
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.login-search-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--txt-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-search-suggestion-item:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  transform: scale(1.02);
+}
+
+.login-suggestion-img {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* --- Menu --- */
+.login-menu-text ul {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.login-menu-text ul li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.login-menu-text ul li a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--txt-color);
+  font-weight: bold;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+}
+
+.login-menu-text ul li a:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+#login-btn-signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Rolam', sans-serif;
+  letter-spacing: 1px;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.25s ease;
+  background-color: transparent;
+  color: var(--txt-color);
+  border: 0;
+}
+
+#login-btn-signin:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+}
+
+/* --- Moving Text Bar --- */
+.login-container-1 {
+  width: 100%;
+  min-height: 35px;
+  background-color: var(--bg-hoverBG);
+  overflow: hidden;
+  position: relative;
+}
+
+.login-animated-text {
+  display: flex;
+  align-items: center;
+  height: 35px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.login-animation-txt {
+  position: absolute;
+  right: -100%;
+  color: var(--txt-color);
+  font-size: 20px;
+  font-weight: bold;
+  animation: move 35s linear infinite;
+}
+
+/* Footer Stick Fix */
+.login-donghua-body-section {
+  margin-top: auto;
+}
+
+/* --- About Detail Section: Left Text & Right Logo --- */
+.login-detail-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  padding: 50px;
+  background-color: #111;
+  border-radius: 15px;
+}
+
+/* --- Auth Card --- */
+.auth-card {
+  width: 380px;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 15px;
+  padding: 40px 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.auth-tabs {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+.auth-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px 0;
+  transition: all 0.3s ease;
+  font-family: 'Space Mono', sans-serif;
+}
+
+.auth-tab.active {
+  border-bottom: 3px solid var(--bg-activeBG);
+  color: var(--bg-activeBG);
+}
+
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-form input {
+  width: 90%;
+  margin-bottom: 15px;
+  padding: 12px 14px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-size: 14px;
+  font-family: 'Space Mono', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.auth-form input:focus {
+  border-color: var(--bg-activeBG);
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 195, 255, 0.4);
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0095c2, #00c3ff);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-family: 'Space Mono', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.auth-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #00c3ff, #00e1ff);
+}
+
+.auth-note {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.auth-switch {
+  color: var(--bg-activeBG);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.auth-switch:hover {
+  text-decoration: underline;
+}
+
+/* --- Fade-in animation --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Keyframe for Scrolling Text --- */
+@keyframes move {
+  from { transform: translateX(50%); }
+  to { transform: translateX(-100%); }
+}
