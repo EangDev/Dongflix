@@ -54,7 +54,7 @@ function DetailPage() {
                 </div>
             </div>
             <div>
-                <WatchPage animeId={id} /> {/* Pass the ID if needed */}
+                <WatchPage animeId={1} />
             </div>
         </header>
     );

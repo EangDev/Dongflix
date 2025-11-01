@@ -159,7 +159,7 @@ function WatchPage() {
             </li>
             <li>
               <FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg" />
-              <a href="#">About Us</a>
+              <Link to="/about">About Us</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" />

@@ -112,8 +112,8 @@ function HomePage() {
         <div className="homepage-menu-text">
           <ul>
             <li><FontAwesomeIcon icon={faHouse} color="#ccc" size="lg"/><Link to="/">Home</Link></li>
-            <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg"/><a href="#">About Us</a></li>
-            <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/><a href="#">Contact Us</a></li>
+            <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg"/><Link to="/about">About</Link></li>
+            <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/><Link to="/">Comtact</Link></li>
             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg"/><a href="#">Support Us</a></li>
             <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><a href="#">Hide ADS</a></li>
             <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg"/><button id="homepage-btn-signin">Sign in</button></li>
