@@ -12,7 +12,6 @@
   font-family: 'Rolam';
   src: url(../../Assets/fonts/ROLAM-PersonalUse.otf);
 }
-
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 /* --- Global Styles --- */
@@ -27,40 +26,56 @@ body {
 /* --- Loading Overlay --- */
 .loading {
   position: fixed;
-  top: 0; 
+  top: 0;
   left: 0;
-  width: 100vw; 
+  width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 195, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 9999;
+  transition: opacity 0.3s ease;
 }
+
 .loading img {
   width: 150px;
   height: 150px;
   object-fit: cover;
+  animation: spin 1.5s linear infinite;
 }
+
 .loading-text {
   font-size: 20px;
   font-weight: bold;
+  color: #00c3ff;
+  margin-top: 15px;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* --- Header --- */
-.header-container {
+.homepage-header-container {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
   height: 80px;
   background-color: var(--bg-headerBG);
 }
-.logo-img {
+
+.homepage-logo-img {
   position: absolute;
   left: 30px;
 }
-.logo-img img {
+
+.homepage-logo-img img {
   width: 180px;
   height: 60px;
   padding: 10px;
@@ -68,13 +83,15 @@ body {
 }
 
 /* --- Search Box --- */
-.search-box {
+.homepage-search-box {
   display: flex;
   align-items: center;
   gap: 8px;
   padding-left: 280px;
+  position: relative;
 }
-.search-box input {
+
+.homepage-search-box input {
   width: 280px;
   height: 35px;
   border-radius: 10px;
@@ -83,10 +100,12 @@ body {
   color: var(--txt-color);
   font-weight: bold;
 }
-.search-box input::placeholder {
+
+.homepage-search-box input::placeholder {
   color: var(--txt-color);
 }
-#btn-search {
+
+#homepage-btn-search {
   border: 0;
   border-radius: 55px;
   background: var(--bg-hoverBG);
@@ -94,38 +113,76 @@ body {
   padding: 9px 14px;
   transition: all 0.25s ease;
 }
-#btn-search:hover {
+
+#homepage-btn-search:hover {
   background-color: var(--bg-activeBG);
   transform: scale(1.05);
-  .Magnifying{color: #fff;}
 }
-.Magnifying {
+
+.homepage-Magnifying {
   color: var(--txt-color);
 }
 
+/* --- Search Suggestions Dropdown --- */
+.homepage-search-suggestions {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-10%);
+  width: 280px;
+  background-color: var(--bg-headerBG);
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.homepage-search-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--txt-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.homepage-search-suggestion-item:hover {
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  transform: scale(1.02);
+}
+
+.homepage-suggestion-img {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
 /* --- Menu --- */
-.menu-text ul {
+.homepage-menu-text ul {
   display: flex;
   justify-content: center;
-  align-items: flex-end; /* align all menu items and sign-in in the same row */
-  gap: 20px; /* spacing between menu items */
+  align-items: flex-end;
+  gap: 20px;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-/* Each menu item with icon above text */
-.menu-text ul li {
+.homepage-menu-text ul li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px; /* space between icon and text */
+  gap: 4px;
 }
 
-/* Links inside menu */
-.menu-text ul li a {
+.homepage-menu-text ul li a {
   display: flex;
-  flex-direction: column; /* icon above text */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
@@ -140,13 +197,13 @@ body {
   transition: all 0.25s ease;
 }
 
-.menu-text ul li a:hover {
+.homepage-menu-text ul li a:hover {
   background-color: var(--bg-hoverBG);
   color: #fff;
   transform: scale(1.05);
 }
 
-#btn-signin {
+#homepage-btn-signin {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,13 +220,13 @@ body {
   border: 0;
 }
 
-#btn-signin:hover {
+#homepage-btn-signin:hover {
   background-color: var(--bg-hoverBG);
   color: #fff;
 }
 
 /* --- Moving Text Bar --- */
-.container-1 {
+.homepage-container-1 {
   width: 100%;
   min-height: 35px;
   background-color: var(--bg-hoverBG);
@@ -177,7 +234,7 @@ body {
   position: relative;
 }
 
-.animated-text {
+.homepage-animated-text {
   display: flex;
   align-items: center;
   height: 35px;
@@ -185,9 +242,9 @@ body {
   position: relative;
 }
 
-.animation-txt {
+.homepage-animation-txt {
   position: absolute;
-  right: -100%; /* start off-screen */
+  right: -100%;
   color: var(--txt-color);
   font-size: 20px;
   font-weight: bold;
@@ -195,164 +252,19 @@ body {
 }
 
 /* --- Banner Section --- */
-.banner-show {
+.homepage-banner-show {
   width: 100%;
   overflow: hidden;
 }
-.banner-show img {
+
+.homepage-banner-show img {
   width: 100%;
   max-height: 480px;
   object-fit: cover;
 }
 
-/* --- Latest Donghua Section --- */
-.latest-update-section {
-  padding: 60px 0;
-  background-color: var(--bg-mainBG);
-}
-.latest-update-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 20px;
-  margin-bottom: 35px;
-}
-.latest-update-link ul{
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.latest-update-link a {
-  text-decoration: none;
-  color: var(--txt-color);
-  font-weight: bold;
-  font-size: 20px;
-  font-family: 'Rolam', sans-serif;
-}
-.latest-update-link span {
-  list-style-type: none;
-  background-color: var(--bg-sliceBG);
-  color: var(--bg-mainBG);
-  padding: 6px 10px;
-  border-radius: 20px 5px;
-}
-
-/* --- Donghua Grid --- */
-.latest-update-body{
-  width: 90%;
-  margin: 0 auto;
-  display: block;
-  background-color: rgba(110, 110, 110, 0.1);
-  padding: 40px 0;
-  border-radius: 10px;
-}
-
-.latest-banner-grid {
-  width: 90%;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px 10px;
-  justify-items: center;
-}
-
-.donghua-slide {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  cursor: pointer;
-}
-
-.image-wrapper {
-  position: relative;
-  width: 200px;
-  height: 250px;
-  overflow: hidden;
-  border-radius: 8px;
-  background-color: #111;
-}
-.image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: all 0.3s ease;
-}
-.image-wrapper:hover img {
-  opacity: 0.5;
-  transform: scale(1.05);
-}
-.image-wrapper .play-overlay {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 50px;
-  color: #00c3ff;
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
-}
-.image-wrapper:hover .play-overlay {
-  opacity: 1;
-}
-.donghua-title {
-  margin-top: 8px;
-  font-size: 14px;
-  text-align: center;
-  width: 200px;
-  transition: color 0.3s ease;
-  text-decoration: none;
-  color: var(--txt-color);
-}
-
-.image-wrapper:hover + .donghua-title {
-  color: var(--bg-activeBG);
-}
-.donghua-episode {
-  position: absolute;
-  top: 0;
-  right: 8px;
-  background-color: rgba(0, 147, 194, 0.9);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 12px;
-  font-weight: bold;
-  color: #fff;
-  font-family: 'Space Mono', sans-serif;
-}
-
-/* --- Pagination Buttons --- */
-.btn-ViewPage {
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-  gap: 12px;
-}
-.btn-ViewPage button {
-  background-color: var(--bg-hoverBG);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 18px;
-  font-family: 'Space Mono', sans-serif;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.btn-ViewPage button:hover {
-  background-color: var(--bg-activeBG);
-  transform: scale(1.05);
-}
-.btn-ViewPage button:disabled {
-  background-color: #222;
-  color: #777;
-  cursor: not-allowed;
-  transform: none;
-}
-
 /* --- Keyframe for Scrolling Text --- */
 @keyframes move {
   from { transform: translateX(50%); }
-  to { transform: translateX(-100%); } /* go fully across */
+  to { transform: translateX(-100%); }
 }

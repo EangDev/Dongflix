@@ -23,6 +23,45 @@ body {
   color: var(--txt-color);
   font-family: 'Space Mono', sans-serif;
 }
+/* --- Loading Overlay --- */
+.loading {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 195, 255, 0.2); /* semi-transparent bluish tint */
+  backdrop-filter: blur(4px); /* adds subtle blur to the background */
+  -webkit-backdrop-filter: blur(4px); /* Safari support */
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+.loading img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  animation: spin 1.5s linear infinite; /* optional spinning effect */
+}
+
+.loading-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #00c3ff; /* bright color for visibility */
+  margin-top: 15px;
+  text-align: center;
+}
+
+/* Optional: spinning animation for logo */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* --- Header --- */
 .watchpage-header-container {
   display: flex;
@@ -451,6 +490,32 @@ body {
   align-items: flex-start;
 }
 
+.watchpage-container-1 {
+  width: 100%;
+  min-height: 35px;
+  background-color: var(--bg-hoverBG);
+  overflow: hidden;
+  position: relative;
+}
+
+/*Animation Text For Watch page*/
+.watchpage-animated-text {
+  display: flex;
+  align-items: center;
+  height: 35px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.watchpage-animation-txt {
+  position: absolute;
+  right: -100%;
+  color: var(--txt-color);
+  font-size: 20px;
+  font-weight: bold;
+  animation: move 35s linear infinite;
+}
+
 /* --- Left side: poster and bookmark --- */
 .donghua-detail-logo {
   flex: 0 0 220px;
@@ -471,38 +536,13 @@ body {
   margin-bottom: 15px;
 }
 
-#btn-bookmark {
-  background-color: var(--bg-hoverBG);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  width: 100%;
-}
-
-#btn-bookmark:hover {
-  background-color: var(--bg-activeBG);
-  transform: scale(1.05);
-}
-
-.donghua-detail-logo p {
-  margin: 6px 0;
-  font-size: 0.8rem;
-  color: #aaa;
-  text-align: center;
-}
-
 /* --- Right side: title, info, and categories --- */
 .donghua-detail-title {
   flex: 1;
 }
 
 .big-titles {
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   color: #fff;
   font-family: 'Space Mono', sans-serif;
   margin-bottom: 5px;

@@ -45,10 +45,16 @@ function CompletePage({ data }) {
                         <div className="complete-donghua-slide" key={index}>
                             <div className="complete-image-wrapper" onClick={() => handleDetail(item)}>
                                 <img src={item.image || item.thumbnail} alt={item.title} />
-                                <div className="complete-play-overlay">
+                                {/* Play overlay */}
+                                <div className="play-overlay">
                                     <FontAwesomeIcon icon={faCirclePlay}/>
                                 </div>
-                                <p className='complete-donghua-episode'>Ep {item.episodesCount || item.episode || "?"}</p>
+                                {/* Episode info */}
+                                <p className='donghua-episode'>Ep {item.episode || item.episodesCount || "?"}</p>
+                                {/* Completed badge */}
+                                {item.category === "completed" && (
+                                    <div className="completed-badge">Completed</div>
+                                )}
                             </div>
                             <a className="complete-donghua-title" onClick={() => handleDetail(item)}>
                                 <p>{item.title}</p>

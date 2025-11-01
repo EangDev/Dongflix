@@ -9,13 +9,17 @@ import re
 import base64
 import time
 
+# ------------------- CACHES -------------------
 CACHE = {"data": [], "timestamp": 0}
 CACHE_TTL = 600
 
 STREAM_CACHE = {}
 STREAM_CACHE_TTL = 600
 
-# Load environment variables
+POPULAR_CACHE = {"data": [], "timestamp": 0}
+POPULAR_TTL = 600
+
+# ------------------- ENV VARIABLES -------------------
 load_dotenv()
 LUCIFER_URL = os.getenv("LUCIFER_URL")
 USER_AGENT = os.getenv("USER_AGENT")
@@ -28,30 +32,31 @@ if not LUCIFER_URL or not urlparse(LUCIFER_URL).scheme:
 if not USER_AGENT:
     raise ValueError("USER_AGENT is missing in .env")
 
+# ------------------- APP -------------------
 app = FastAPI()
 
-# CORS
+# ------------------- CORS -------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # frontend URL
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ------------------- LATEST -------------------
 @app.get("/lucifer")
 def get_lucifer_home():
     try:
         headers = {"User-Agent": USER_AGENT}
 
-        # Use cache if it's still valid
+        # Use cache if still valid
         if time.time() - CACHE["timestamp"] < CACHE_TTL:
             return {"count": len(CACHE["data"]), "data": CACHE["data"]}
 
         donghua_list = []
         page = 1
 
-        # Loop through pages until no more anime are found
         while True:
             url = f"{LUCIFER_URL}/page/{page}/" if page > 1 else LUCIFER_URL
             res = requests.get(url, headers=headers)
@@ -60,7 +65,6 @@ def get_lucifer_home():
 
             soup = BeautifulSoup(res.text, "html.parser")
             latest_section = soup.select_one("div.listupd.normal div.excstf")
-
             if not latest_section:
                 break
 
@@ -70,33 +74,38 @@ def get_lucifer_home():
 
             for item in items:
                 link_tag = item.select_one("a.tip")
-                if link_tag:
-                    full_title = link_tag.get("title")
-                    link = link_tag.get("href")
+                if not link_tag:
+                    continue
 
-                    # Extract episode number
-                    ep_match = re.search(r'Episode (\d+)', full_title, re.IGNORECASE)
-                    episode = ep_match.group(1) if ep_match else None
+                full_title = link_tag.get("title", "").strip()
+                link = link_tag.get("href", "").strip()
 
-                    # Clean title
-                    title = re.sub(r'\s*Episode \d+.*', '', full_title, flags=re.IGNORECASE)
+                # Extract episode number
+                ep_match = re.search(r'Episode\s*(\d+)', full_title, re.IGNORECASE)
+                episode = ep_match.group(1) if ep_match else None
 
-                    img_tag = link_tag.select_one("img")
-                    image = (
-                        img_tag.get("data-srcset")
-                        or img_tag.get("data-src")
-                        or img_tag.get("src")
-                    )
+                # Clean title (remove Episode numbers)
+                title = re.sub(r'\s*Episode\s*\d+.*', '', full_title, flags=re.IGNORECASE).strip()
 
-                    donghua_list.append({
-                        "title": title.strip(),
-                        "episode": episode,
-                        "link": link,
-                        "image": image
-                    })
+                # Get image
+                img_tag = link_tag.select_one("img")
+                image = (
+                    img_tag.get("data-srcset")
+                    or img_tag.get("data-src")
+                    or img_tag.get("src")
+                    or ""
+                )
 
-            page += 1  # move to next page
-            time.sleep(0.3)  # small delay to avoid being blocked
+                # Append result
+                donghua_list.append({
+                    "title": title,
+                    "episode": episode,
+                    "link": link,
+                    "image": image,
+                })
+                
+            page += 1
+            time.sleep(0.3)
 
         # Cache results
         CACHE["data"] = donghua_list
@@ -109,11 +118,72 @@ def get_lucifer_home():
     except Exception as err:
         raise HTTPException(status_code=500, detail=f"Scraper error: {str(err)}")
 
+# ------------------- POPULAR -------------------
+@app.get("/api/anime/popular")
+def get_anime4i_popular():
+    try:
+        headers = {"User-Agent": USER_AGENT}
+
+        # Use cache if still valid
+        if time.time() - POPULAR_CACHE["timestamp"] < POPULAR_TTL:
+            return {"count": len(POPULAR_CACHE["data"]), "results": POPULAR_CACHE["data"]}
+
+        res = requests.get(LUCIFER_URL, headers=headers)
+        if res.status_code != 200:
+            raise HTTPException(status_code=404, detail="Failed to load Anime4i homepage")
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        popular_section = soup.select_one("div.listupd.popularslider")
+        if not popular_section:
+            raise HTTPException(status_code=404, detail="Popular section not found")
+
+        items = popular_section.select("article.bs")
+        results = []
+
+        for item in items:
+            link_tag = item.select_one("a.tip")
+            if not link_tag:
+                continue
+
+            title = link_tag.get("title", "").strip()
+            link = link_tag.get("href", "#").strip()
+
+            ep_match = re.search(r"Episode\s*(\d+)", title, re.IGNORECASE)
+            episode = ep_match.group(1) if ep_match else None
+
+            clean_title = re.sub(r"\s*Episode\s*\d+.*", "", title, flags=re.IGNORECASE).strip()
+
+            img_tag = item.select_one("img")
+            image = (
+                img_tag.get("data-srcset")
+                or img_tag.get("data-src")
+                or img_tag.get("src")
+                or ""
+            )
+
+            type_tag = item.select_one("div.typez")
+            anime_type = type_tag.get_text(strip=True) if type_tag else "Unknown"
+
+            results.append({
+                "title": clean_title,
+                "episode": episode,
+                "type": anime_type,
+                "link": link,
+                "image": image
+            })
+
+        POPULAR_CACHE["data"] = results
+        POPULAR_CACHE["timestamp"] = time.time()
+
+        return {"count": len(results), "results": results}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scraper error: {str(e)}")
+
+# ------------------- STREAM -------------------
 @app.get("/api/stream")
 def get_stream(url: str):
     now = time.time()
-
-    # ✅ Check if URL is already cached and still fresh
     if url in STREAM_CACHE and now - STREAM_CACHE[url]["timestamp"] < STREAM_CACHE_TTL:
         return STREAM_CACHE[url]["data"]
 
@@ -122,10 +192,9 @@ def get_stream(url: str):
         res = requests.get(url, headers=headers)
         if res.status_code != 200:
             raise HTTPException(status_code=404, detail="Episode not found")
-        
+
         soup = BeautifulSoup(res.text, "html.parser")
-        
-        # --- Find server links in the select dropdown (base64 encoded) ---
+
         servers = {}
         select = soup.select_one("select.mirror")
         if select:
@@ -135,26 +204,22 @@ def get_stream(url: str):
                 server_name = opt.text.strip()
                 if value:
                     try:
-                        # decode base64
                         decoded = base64.b64decode(value).decode("utf-8")
-                        # parse iframe src
                         iframe_soup = BeautifulSoup(decoded, "html.parser")
                         iframe = iframe_soup.find("iframe")
                         if iframe and iframe.get("src"):
                             servers[server_name] = iframe.get("src")
                     except Exception:
                         continue
-        
-        # --- Fallback: try to get any iframe directly ---
+
         if not servers:
             iframe = soup.find("iframe")
             if iframe and iframe.get("src"):
                 servers["default"] = iframe.get("src")
-        
+
         if not servers:
             raise HTTPException(status_code=404, detail="No video servers found")
 
-        # ✅ Store result in cache
         result = {"servers": servers}
         STREAM_CACHE[url] = {"data": result, "timestamp": now}
         return result
@@ -162,22 +227,16 @@ def get_stream(url: str):
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
 
+# ------------------- EPISODES -------------------
 @app.get("/api/episodes")
 def get_episodes(url: str):
-    """
-    Fetch episode list for a given anime (Anime4i compatible)
-    """
     headers = {"User-Agent": USER_AGENT}
     res = requests.get(url, headers=headers)
     if res.status_code != 200:
         raise HTTPException(status_code=404, detail="Failed to load anime page")
 
     soup = BeautifulSoup(res.text, "html.parser")
-
-    # Try to find episodes directly on the page
     episode_items = soup.select("ul#episode_related li a, ul.episodelist li a")
-
-    # If still empty, try alternative layouts
     if not episode_items:
         episode_items = soup.select("div#episodes li a, div.episodelist a")
 
@@ -185,35 +244,22 @@ def get_episodes(url: str):
     for ep in episode_items:
         ep_url = ep.get("href")
         text = ep.text.strip()
-
-        # Prefer explicit "Episode xxx" pattern
         ep_match = re.search(r'[Ee]pisode\s*(\d+)', text)
         if ep_match:
             ep_number = ep_match.group(1)
         else:
-            # fallback to the last number in the text
             numbers = re.findall(r'\d+', text)
             ep_number = numbers[-1] if numbers else text
-
         if ep_url:
-            episodes.append({
-                "number": ep_number,
-                "url": ep_url
-            })
+            episodes.append({"number": ep_number, "url": ep_url})
 
     if not episodes:
         raise HTTPException(status_code=404, detail="No episodes found")
 
-    # Sort by episode number (if numeric)
-    def parse_num(x):
-        try:
-            return int(x["number"])
-        except:
-            return 9999
-    episodes = sorted(episodes, key=parse_num)
-
+    episodes = sorted(episodes, key=lambda x: int(x["number"]) if x["number"].isdigit() else 9999)
     return {"count": len(episodes), "episodes": episodes}
 
+# ------------------- DETAILS -------------------
 @app.get("/api/details")
 def get_details(url: str):
     headers = {"User-Agent": USER_AGENT}
@@ -223,23 +269,27 @@ def get_details(url: str):
             raise HTTPException(status_code=404, detail="Failed to load anime page")
 
         soup = BeautifulSoup(res.text, "html.parser")
+        
+        # --- Get status (Completed/Ongoing) ---
+        status = "Ongoing"
+        status_tag = soup.select_one("div.status, span:contains('Status')")
+        if status_tag:
+            status_text = status_tag.get_text(strip=True)
+            if any(x in status_text.lower() for x in ["complete", "finished"]):
+                status = "Completed"
+            elif any(x in status_text.lower() for x in ["ongoing", "airing"]):
+                status = "Ongoing"
+            else:
+                status = status_text
 
-        # --- Title extraction ---
         title_tag = soup.find("h1") or soup.find("h2") or soup.find("h3")
         raw_title = title_tag.get_text(strip=True) if title_tag else "Unknown Title"
 
-        # --- Clean up the title ---
-        series = re.sub(
-            r"(?:Season|S\d+|Ep\s*\d+|Episode\s*\d+|\[\w+\]|\(.*?\))",
-            "",
-            raw_title,
-            flags=re.IGNORECASE
-        ).strip()
+        series = re.sub(r"(?:Season|S\d+|Ep\s*\d+|Episode\s*\d+|\[\w+\]|\(.*?\))",
+                        "", raw_title, flags=re.IGNORECASE).strip()
 
-        # --- Info extraction (status, release, studio, etc.) ---
         info_section = soup.select_one("div.info-content, div.infotable, div.spe, div.infodesc")
         details = {}
-
         if info_section:
             for item in info_section.find_all(["p", "span", "li"]):
                 text = item.get_text(" ", strip=True)
@@ -247,55 +297,26 @@ def get_details(url: str):
                     key, val = text.split(":", 1)
                     details[key.strip().capitalize()] = val.strip()
 
-        # --- Alternative Title ---
-        alt_title = (
-            details.get("Alternative title")
-            or details.get("Other name")
-            or details.get("Synonyms")
-            or details.get("Also known as")
-            or details.get("Chinese name")
-            or "None"
-        )
-
-        # --- Release Date ---
-        release = (
-            details.get("Release")
-            or details.get("Released")
-            or details.get("Aired")
-            or "Unknown"
-        )
-
-        # --- Studio ---
+        alt_title = (details.get("Alternative title") or details.get("Other name") or
+                     details.get("Synonyms") or details.get("Also known as") or
+                     details.get("Chinese name") or "None")
+        release = details.get("Release") or details.get("Released") or details.get("Aired") or "Unknown"
         studio = details.get("Studio") or "Unknown Studio"
-
-        # --- Type ---
         anime_type = details.get("Type") or "Unknown Type"
-
-        # --- Episodes ---
-        episodes = details.get("Episodes") or "N/A"
-
-        # --- Duration ---
+        episodes_count = details.get("Episodes") or "N/A"
         duration = details.get("Duration") or "Unknown Duration"
 
-        # --- Genres from Anime4i ---
         genres = []
-        genre_section = soup.select_one("div.genxed")  # <-- Anime4i’s genre container
+        genre_section = soup.select_one("div.genxed")
         if genre_section:
             genres = [a.get_text(strip=True) for a in genre_section.find_all("a", rel="tag")]
         else:
-            # fallback: look for text like "Genre: Action, Adventure"
-            genre_text = None
-            for k, v in details.items():
-                if "Genre" in k:
-                    genre_text = v
-                    break
+            genre_text = next((v for k, v in details.items() if "Genre" in k), "")
             if genre_text:
                 genres = [g.strip() for g in re.split(r"[,/]", genre_text)]
-
         if not genres:
             genres = ["Unknown"]
 
-        # --- Description ---
         desc_tag = soup.find("div", class_=re.compile(r"desc|synopsis|summary", re.IGNORECASE))
         if desc_tag:
             description = " ".join(desc_tag.stripped_strings)
@@ -310,26 +331,22 @@ def get_details(url: str):
             "releaseDate": release,
             "studio": studio,
             "type": anime_type,
-            "episodes": episodes,
+            "episodes": episodes_count,
             "duration": duration,
             "description": description,
             "genres": genres,
+            "status": status
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to extract details: {str(e)}")
 
+# ------------------- ALL -------------------
 @app.get("/api/all")
 def get_all():
     try:
-        # Fetch Lucifer (latest)
-        lucifer = requests.get("http://127.0.0.1:8001/lucifer").json().get("data", [])
-        # Fetch Kisskh popular
-        kisskh = requests.get("http://127.0.0.1:8000/api/animate").json().get("results", [])
-        # Fetch Kisskh completed
-        kisskh_completed = requests.get("http://127.0.0.1:8000/api/completed").json().get("results", [])
+        lucifer = requests.get("http://127.0.0.1:8000/lucifer").json().get("data", [])
 
-        # Normalize and tag
         def normalize_lucifer(item):
             return {
                 "title": item.get("title"),
@@ -337,37 +354,12 @@ def get_all():
                 "image": item.get("image"),
                 "episode": item.get("episode"),
                 "source": "lucifer",
-                "category": "latest"  # mark as latest
+                "category": "latest",
+                "status": item.get("status", "Ongoing")
             }
 
-        def normalize_kisskh(item):
-            return {
-                "title": item.get("title"),
-                "link": item.get("url"),
-                "image": item.get("thumbnail"),
-                "episode": item.get("episodesCount"),
-                "source": "kisskh",
-                "category": "popular"  # mark as popular
-            }
-
-        def normalize_kisskh_completed(item):
-            return {
-                "title": item.get("title"),
-                "link": item.get("url"),
-                "image": item.get("thumbnail"),
-                "episode": item.get("episodesCount"),
-                "source": "kisskh",
-                "category": "completed"  # mark as completed
-            }
-
-        all_items = (
-            [normalize_lucifer(i) for i in lucifer] +
-            [normalize_kisskh(i) for i in kisskh] +
-            [normalize_kisskh_completed(i) for i in kisskh_completed]
-        )
-
+        all_items = [normalize_lucifer(i) for i in lucifer]
         return {"count": len(all_items), "results": all_items}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch combined data: {str(e)}")
-

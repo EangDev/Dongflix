@@ -8,6 +8,7 @@ import {
   faHeart, faBookOpen, faEnvelope, faTelevision
 } from "@fortawesome/free-solid-svg-icons";
 import logo from '../Assets/mylogo.png';
+import loadingImg from '../Assets/loading.gif';
 
 function WatchPage() {
   const [params] = useSearchParams();
@@ -43,37 +44,37 @@ function WatchPage() {
     if (!initialUrl) return;
 
     // Fetch episode list
-    fetch(`http://127.0.0.1:8001/api/episodes?url=${encodeURIComponent(initialUrl)}`)
+    fetch(`http://127.0.0.1:8000/api/episodes?url=${encodeURIComponent(initialUrl)}`)
       .then(res => res.json())
       .then(data => {
         const list = data.episodes || [];
         setEpisodes(list);
 
-        // --- 🔍 Try to detect which episode is currently playing
+        // ---Try to detect which episode is currently playing
         const currentEp = list.findIndex(ep => initialUrl.includes(ep.url.split('/').pop()));
         if (currentEp !== -1) {
           const currentPage = Math.floor(currentEp / EPISODES_PER_PAGE) + 1;
-          setPage(currentPage); // ✅ Auto-select page
+          setPage(currentPage);
         }
       })
       .catch(console.error);
 
     // Fetch title details
-    fetch(`http://127.0.0.1:8001/api/details?url=${encodeURIComponent(initialUrl)}`)
+    fetch(`http://127.0.0.1:8000/api/details?url=${encodeURIComponent(initialUrl)}`)
       .then(res => res.json())
       .then(data => {
         if (data.url === initialUrl || data.title) {
           settitleDetails(prev => ({
             ...prev,
             ...data,
-            image: data.image || prev.image // keep initial image if API has none
+            image: data.image || prev.image
           }));
         }
       })
       .catch(console.error);
 
     // Fetch default stream
-    fetch(`http://127.0.0.1:8001/api/stream?url=${encodeURIComponent(initialUrl)}`)
+    fetch(`http://127.0.0.1:8000/api/stream?url=${encodeURIComponent(initialUrl)}`)
       .then(res => res.json())
       .then(data => {
         if (data.servers) {
@@ -115,7 +116,7 @@ function WatchPage() {
 
     // Otherwise, fetch new stream data
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/stream?url=${encodeURIComponent(ep.url)}`);
+      const res = await fetch(`http://127.0.0.1:8000/api/stream?url=${encodeURIComponent(ep.url)}`);
       const data = await res.json();
       if (data.servers) {
         const firstServer = Object.values(data.servers)[0];
@@ -128,14 +129,19 @@ function WatchPage() {
     }
   };
 
-  if (!currentServer) return;
+  if (!currentServer) return (
+    <div className="loading">
+        <img src={loadingImg} alt="Loading..." />
+        <p className="loading-text">Loading...</p>
+    </div>
+  );
 
   return (
     <header>
       {/* ---- HEADER ---- */}
       <div className="watchpage-header-container">
         <div className="watchpage-logo-img">
-          <img src={logo} alt="logo" />
+          <Link to="/"><img src={logo} alt="logo" /></Link>
         </div>
 
         <div className="watchpage-search-box">
@@ -174,11 +180,13 @@ function WatchPage() {
           </ul>
         </div>
       </div>
-      <div className="container-1">
-        <div className="animated-text">
-          <div className="animation-txt">💖 Welcome to DongFlix — Your ultimate world of donghua! From the fiery battles of Battle Through the Heavens ⚔️ to the mystical realms of Soul Land 💥 and Perfect World 🌏, get ready to embark on endless adventures 🌈 that will leave you inspired!</div>
+
+      <div className="watchpage-container-1">
+        <div className="watchpage-animated-text">
+          <div className="watchpage-animation-txt">💖 Welcome to DongFlix — Your ultimate world of donghua! From the fiery battles of Battle Through the Heavens ⚔️ to the mystical realms of Soul Land 💥 and Perfect World 🌏, get ready to embark on endless adventures 🌈 that will leave you inspired!</div>
         </div>
       </div>
+
       {/*----TITLE HEADER----*/}
       <div className="title-detail-container">
         <div className="title-detail-bg">
@@ -188,7 +196,7 @@ function WatchPage() {
           <div className="title-release-date">
             <p>
               Released on <span>{titleDetails.releaseDate}</span> . Posted by:{" "}
-              <a href="">{titleDetails.postedBy}</a> . Series:{" "} 
+              <Link to="/"><a>{titleDetails.postedBy}</a></Link> . Series:{" "}
               <a href="">{titleDetails.series}</a>
             </p>
           </div>
@@ -267,9 +275,6 @@ function WatchPage() {
           {/* Left: Logo */}
           <div className="donghua-detail-logo">
             <img src={titleDetails.image || logo} alt={titleDetails.title} />
-            <button id="btn-bookmark">Bookmark</button>
-            <p>Please Login to use this Bookmark</p>
-            <p>Followed 196 people</p>
           </div>
 
           {/* Right: Title + Status */}
