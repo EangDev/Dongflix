@@ -30,6 +30,7 @@ body {
     background-color: var(--bg-headerBG);
     border-radius: 10px;
     padding: 20px 0;
+    margin-top: 50px;
 }
 
 .footer-header{
