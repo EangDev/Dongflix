@@ -44,7 +44,24 @@ function PopularPage() {
             alert("Video URL not available for this anime!");
             return;
         }
-        navigate(`/watch?url=${encodeURIComponent(item.link)}&image=${encodeURIComponent(item.image)}`);
+
+        // Get existing recently watched
+        let watched = JSON.parse(localStorage.getItem("recentlyWatched")) || [];
+
+        // Remove duplicate if exists
+        watched = watched.filter(w => w.link !== item.link);
+
+        // Add the new one at the start
+        watched.unshift(item);
+
+        // Keep only the 7 latest
+        if (watched.length > 7) watched = watched.slice(0, 7);
+
+        // Save back to localStorage
+        localStorage.setItem("recentlyWatched", JSON.stringify(watched));
+
+        // Navigate to watch page
+        navigate(`/watch?url=${encodeURIComponent(item.link)}&image=${encodeURIComponent(item.image || item.thumbnail)}`);
     };
 
     return (

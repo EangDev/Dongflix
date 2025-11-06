@@ -8,6 +8,11 @@ from urllib.parse import urlparse
 import re
 import base64
 import time
+import pyodbc
+from pydantic import BaseModel
+import smtplib
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
 
 # ------------------- CACHES -------------------
 CACHE = {"data": [], "timestamp": 0}
@@ -23,6 +28,20 @@ POPULAR_TTL = 600
 load_dotenv()
 LUCIFER_URL = os.getenv("LUCIFER_URL")
 USER_AGENT = os.getenv("USER_AGENT")
+
+# Database call
+DB_SERVER = os.getenv("DB_SERVER")
+DB_NAME = os.getenv("DB_NAME")
+
+conn = pyodbc.connect(
+    f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+    f"SERVER={DB_SERVER};"
+    f"DATABASE={DB_NAME};"
+    f"Trusted_Connection=yes;"
+    f";Encrypt=no;"
+)
+
+cursor = conn.cursor()
 
 # Validate URL
 if not LUCIFER_URL or not urlparse(LUCIFER_URL).scheme:
@@ -43,6 +62,132 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class PremiumPurchase(BaseModel):
+    user_id: int
+    duration: str
+    price: float
+    payment_method: str
+
+@app.post("/api/user/premium")
+def activate_premium(data: PremiumPurchase):
+    now = datetime.now()
+
+    # Duration mapping
+    if data.duration == "1-Month":
+        end_date = now + timedelta(days=30)
+    elif data.duration == "3-Month":
+        end_date = now + timedelta(days=90)
+    elif data.duration == "Lifetime":
+        end_date = None
+    else:
+        raise HTTPException(status_code=400, detail="Invalid duration")
+
+    try:
+        cursor.execute("""
+            UPDATE tb_signup
+            SET hasPremium = 1,
+                premiumType = ?,
+                paymentMethod = ?,
+                premiumStart = ?,
+                premiumEnd = ?,
+                ads = 1  -- ✅ Fixed: use BIT 1 instead of 'Hidden'
+            WHERE id = ?
+        """, data.duration, data.payment_method, now, end_date, data.user_id)
+        conn.commit()
+
+        return {
+            "status": "success",
+            "message": "✅ Premium activated successfully! Ads are now hidden."
+        }
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ContactMessage(BaseModel):
+    user_email: str
+    subject: str
+    message: str
+
+def send_email(subject: str, body: str, from_email: str):
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_pass = os.getenv("SMTP_PASS")
+    receiver = os.getenv("SUPPORT_RECEIVER")
+
+    msg = MIMEText(body, "plain")
+    msg["Subject"] = subject
+    msg["From"] = from_email
+    msg["To"] = receiver
+
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        print(f"Email sending error: {e}")
+        return False
+
+@app.post("/api/contact")
+def contact_support(data: ContactMessage):
+    # Check if user exists
+    cursor.execute("SELECT username FROM tb_signup WHERE email = ?", data.user_email)
+    user = cursor.fetchone()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User email not found")
+
+    # Build email body
+    body = f"Message from {user[0]} ({data.user_email}):\n\n{data.message}"
+
+    sent = send_email(subject=data.subject, body=body, from_email=data.user_email)
+    if sent:
+        return {"status": "success", "message": "Your message has been sent to support."}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to send message.")
+
+class Signup(BaseModel):
+    username: str
+    email: str
+    password: str
+
+class Login(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/signup")
+def signup(data: Signup):
+    try:
+        cursor.execute(
+            "INSERT INTO tb_signup (username, email, password) VALUES (?, ?, ?)",
+            data.username, data.email, data.password
+        )
+        conn.commit()
+        return {"status": "success", "message": "User signed up!"}
+    except pyodbc.IntegrityError:
+        raise HTTPException(status_code=400, detail="Username or email already exists")
+
+@app.post("/api/login")
+def login(data: Login):
+    cursor.execute(
+        "SELECT id, username, email, ads FROM tb_signup WHERE email = ? AND password = ?",
+        data.email, data.password,
+    )
+    user = cursor.fetchone()
+    if user:
+        return {
+            "status": "success",
+            "user_id": user[0],
+            "username": user[1],
+            "email" : user[2],
+            "ads": bool(user[3]),
+        }
+    else:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
 # ------------------- LATEST -------------------
 @app.get("/lucifer")

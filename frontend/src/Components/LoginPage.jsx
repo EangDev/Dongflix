@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Select } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./style/LoginPageStyle.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import logo from '../Assets/mylogo.png';
 import loadingImg from '../Assets/loading.gif';
+import defaultAvatar from '../Assets/avatar/A1.png';
 import FooterDonghuaPage from '../Components/FooterPage';
 
 function LoginPage(){
@@ -19,7 +20,6 @@ function LoginPage(){
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeTab, setActiveTab] = useState("login");
 
-    {/*--this is for fetch the combined api from the backend--*/}
     useEffect(() => {
         const fetchAll = async () => {
           try {
@@ -36,7 +36,6 @@ function LoginPage(){
         fetchAll();
     }, []);
     
-    {/*--this effect is for searching method--*/}
     useEffect(() => {
         if (!searchQuery) {
             setFilteredDonghua([]);
@@ -69,16 +68,100 @@ function LoginPage(){
     const [signupEmail, setSignupEmail] = useState("");
     const [signupPassword, setSignupPassword] = useState("");
 
-    const handleLogin = (e) => {
-    e.preventDefault();
-    console.log("Login:", { loginEmail, loginPassword });
-    
+    // User state
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        if (!loginEmail || !loginPassword) {
+            alert("Please enter email and password.");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://127.0.0.1:8000/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: loginEmail,
+                    password: loginPassword,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                console.log("Login successful:", data);
+                // Save user info
+                const userData = {
+                    user_id: data.user_id,
+                    username: data.username || "User",
+                    email: data.email,
+                    avatar: data.avatar || defaultAvatar,
+                };
+
+                localStorage.setItem("user", JSON.stringify(userData));
+                setUser(userData);
+
+                setLoginEmail("");
+                setLoginPassword("");
+
+                navigate("/");
+            } else {
+                alert(data.detail || "Login failed. Check email/password.");
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+            alert("Unable to connect to server.");
+        }
     };
 
-    const handleSignup = (e) => {
-    e.preventDefault();
-    console.log("Signup:", { signupName, signupEmail, signupPassword });
-    
+    const handleSignup = async (e) => {
+        e.preventDefault();
+
+        if (!signupName || !signupEmail || !signupPassword) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://127.0.0.1:8000/api/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: signupName,
+                    email: signupEmail,
+                    password: signupPassword,
+                }),
+            });
+
+            const data = await res.json();
+            
+            if (res.ok) {
+                console.log("Signup successful:", data);
+                alert("Account created! You can now login.");
+                
+                // Clear signup form
+                setSignupName("");
+                setSignupEmail("");
+                setSignupPassword("");
+
+                setActiveTab("login");
+            } else {
+                alert(data.detail || "Signup failed.");
+            }
+        } catch (err) {
+            console.error("Signup error:", err);
+            alert("Unable to connect to server.");
+        }
     };
 
     if (loading) {
@@ -141,7 +224,27 @@ function LoginPage(){
                             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
                             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><Link to="/support">Support Us</Link></li>
                             <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide ADS</Link></li>
-                            <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /><Link to="/login">Sign In</Link></li>
+                            {/* User avatar or Sign In */}
+                            <li>
+                                {user ? (
+                                <div
+                                    className="user-avatar-container"
+                                    onClick={() => navigate("/profile")}
+                                >
+                                    <img
+                                    src={defaultAvatar}
+                                    alt={user.username}
+                                    className="user-avatar-circle"
+                                    />
+                                    <span className="user-avatar-username">{user.username}</span>
+                                </div>
+                                ) : (
+                                <Link to="/login">
+                                    <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign
+                                    In
+                                </Link>
+                                )}
+                            </li>
                         </ul>
                     </div>
                 </div>

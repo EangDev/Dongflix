@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import logo from '../Assets/mylogo.png';
 import loadingImg from '../Assets/loading.gif';
+import defaultAvatar from '../Assets/avatar/A1.png';
 
 function WatchPage() {
   const [params] = useSearchParams();
@@ -38,7 +39,39 @@ function WatchPage() {
 
   const descriptionPreview = titleDetails.description?.slice(0, 200);
   const fullDescription = titleDetails.description;
-  
+  // Add state for bookmarks
+  const [bookmarks, setBookmarks] = useState(() => {
+    const saved = localStorage.getItem("bookmarks");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Toggle bookmark function
+  const toggleBookmark = () => {
+    const exists = bookmarks.find(b => b.url === initialUrl);
+    let updatedBookmarks;
+
+    if (exists) {
+      // Remove bookmark
+      updatedBookmarks = bookmarks.filter(b => b.url !== initialUrl);
+    } else {
+      // Add bookmark
+      updatedBookmarks = [...bookmarks, {
+        url: initialUrl,
+        title: titleDetails.title,
+        image: titleDetails.image,
+        thumbnail: titleDetails.image
+      }];
+    }
+
+    setBookmarks(updatedBookmarks);
+    localStorage.setItem("bookmarks", JSON.stringify(updatedBookmarks));
+  };
+
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   // --- Fetch episodes list on initial load ---
   useEffect(() => {
     if (!initialUrl) return;
@@ -173,9 +206,24 @@ function WatchPage() {
               <FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" />
               <a href="#">Hide ADS</a>
             </li>
-            <li>
-              <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" />
-              <button id="watchpage-btn-signin">Sign in</button>
+             <li>
+              {user ? (
+                <div
+                  className="user-avatar-container"
+                  onClick={() => navigate("/profile")}
+                >
+                <img
+                  src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                  alt={user.username}
+                  className="user-avatar-circle"
+                />
+                <span className="user-avatar-username">{user.username}</span>
+                </div>
+                  ) : (
+                  <Link to="/login">
+                    <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign In
+                  </Link>
+              )}
             </li>
           </ul>
         </div>
@@ -275,8 +323,14 @@ function WatchPage() {
           {/* Left: Logo */}
           <div className="donghua-detail-logo">
             <img src={titleDetails.image || logo} alt={titleDetails.title} />
+            <button
+              className={bookmarks.find(b => b.url === initialUrl) ? "active" : ""}
+              onClick={toggleBookmark}
+            >
+              <FontAwesomeIcon icon={faHeart} /> 
+              {bookmarks.find(b => b.url === initialUrl) ? "Bookmarked" : "Bookmark"}
+            </button>
           </div>
-
           {/* Right: Title + Status */}
           <div className="donghua-detail-right">
             <div className="donghua-detail-title">

@@ -9,6 +9,7 @@ import {
 import logo from '../Assets/mylogo.png';
 import loadingImg from '../Assets/loading.gif';
 import FooterDonghuaPage from '../Components/FooterPage';
+import defaultAvatar from '../Assets/avatar/A1.png';
 
 function SupportPage(){
 
@@ -19,6 +20,11 @@ function SupportPage(){
     const [loading, setLoading] = useState(true);
     const [showSuggestions, setShowSuggestions] = useState(false);
     
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+
     {/*--this is for fetch the combined api from the backend--*/}
     useEffect(() => {
         const fetchAll = async () => {
@@ -119,7 +125,25 @@ function SupportPage(){
                             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
                             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><a href="/support">Support Us</a></li>
                             <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide ADS</Link></li>
-                            <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /><Link to="/login">Sign In</Link></li>
+                            <li>
+                            {user ? (
+                                <div
+                                    className="user-avatar-container"
+                                    onClick={() => navigate("/profile")}
+                                >
+                                <img
+                                    src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                                    alt={user.username}
+                                    className="user-avatar-circle"
+                                />
+                                <span className="user-avatar-username">{user.username}</span>
+                                </div>
+                                ) : (
+                                    <Link to="/login">
+                                    <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign In
+                                    </Link>
+                                )}
+                            </li>
                         </ul>
                     </div>
                 </div>

@@ -9,6 +9,7 @@ import {
 import logo from '../Assets/mylogo.png';
 import loadingImg from '../Assets/loading.gif';
 import FooterDonghuaPage from '../Components/FooterPage';
+import defaultAvatar from '../Assets/avatar/A1.png';
 
 function AboutPage() {
   const navigate = useNavigate();
@@ -58,6 +59,11 @@ function AboutPage() {
     setSearchQuery("");
     setShowSuggestions(false);
   };
+
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   if (loading) {
     return (
@@ -119,7 +125,25 @@ function AboutPage() {
                         <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
                         <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><Link to="/support">Support Us</Link></li>
                         <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide Ads</Link></li>
-                        <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /><button id="about-btn-signin">Sign in</button></li>
+                        <li>
+                          {user ? (
+                            <div
+                              className="user-avatar-container"
+                              onClick={() => navigate("/profile")}
+                            >
+                              <img
+                                src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                                alt={user.username}
+                                className="user-avatar-circle"
+                              />
+                              <span className="user-avatar-username">{user.username}</span>
+                            </div>
+                          ) : (
+                            <Link to="/login">
+                              <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign In
+                            </Link>
+                          )}
+                        </li>
                     </ul>
                 </div>
             </div>

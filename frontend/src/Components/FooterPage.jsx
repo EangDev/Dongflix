@@ -9,7 +9,7 @@ function FooterPage(){
                 <img src={logo} alt="logo" />
             </div>
             <div className="footer-footer">
-                <p>Copyright © 2025 Dongflix – Watch Online: Chinese Anime / Donghua. All Rights Reserved</p>
+                <p>&copy; {new Date().getFullYear()} Dongflix – Watch Online: Chinese Anime / Donghua. All Rights Reserved</p>
                 <p className="disclaimer">Disclaimer: This site Dongflix – Watch Online: Chinese Anime / Donghua does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
             </div>
         </div>

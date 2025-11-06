@@ -10,6 +10,7 @@ import PopularDonghuaPage from '../Components/PopularPage';
 import CompleteDonghuaPage from '../Components/CompletePage';
 import FooterDonghuaPage from '../Components/FooterPage';
 import loadingImg from '../Assets/loading.gif';
+import defaultAvatar from '../Assets/avatar/A1.png';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -18,6 +19,11 @@ function HomePage() {
   const [filteredDonghua, setFilteredDonghua] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -116,7 +122,25 @@ function HomePage() {
             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/><Link to="/contact">Comtact</Link></li>
             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg"/><Link to="/support">Support Us</Link></li>
             <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><Link to="/hide">Hide ADS</Link></li>
-            <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg"/><Link to="/login">Sign In</Link></li>
+            <li>
+              {user ? (
+                <div
+                  className="user-avatar-container"
+                  onClick={() => navigate("/profile")}
+                >
+                  <img
+                    src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                    alt={user.username}
+                    className="user-avatar-circle"
+                  />
+                  <span className="user-avatar-username">{user.username}</span>
+                </div>
+              ) : (
+                <Link to="/login">
+                  <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign In
+                </Link>
+              )}
+            </li>
           </ul>
         </div>
       </div>

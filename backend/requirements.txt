@@ -1,5 +1,5 @@
 api
-
+pyodbc
 # FastAPI web framework
 fastapi
 

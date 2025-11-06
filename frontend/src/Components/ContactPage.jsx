@@ -2,6 +2,7 @@ import React, { useState, useEffect, Select } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./style/ContactPageStyle.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTelegram, faFacebook, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import {
   faUser, faMagnifyingGlass, faHouse,
   faHeart, faBookOpen, faEnvelope, faTelevision
@@ -9,6 +10,7 @@ import {
 import logo from '../Assets/mylogo.png';
 import loadingImg from '../Assets/loading.gif';
 import FooterDonghuaPage from '../Components/FooterPage';
+import defaultAvatar from '../Assets/avatar/A1.png';
 
 function ContactPage(){
     const navigate = useNavigate();
@@ -17,6 +19,12 @@ function ContactPage(){
     const [filteredDonghua, setFilteredDonghua] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showSuggestions, setShowSuggestions] = useState(false);
+
+    {/*-------Email Sender Stuft-------*/}
+    const [subject, setSubject] = useState("");
+    const [message, setMessage] = useState("");
+    const [department, setDepartment] = useState("General Support");
+    const [isSending, setIsSending] = useState(false);
 
     {/*--this is for fetch the combined api from the backend--*/}
     useEffect(() => {
@@ -59,6 +67,11 @@ function ContactPage(){
         setShowSuggestions(false);
     };
     
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+
     if (loading) {
         return (
           <div className="loading">
@@ -119,7 +132,25 @@ function ContactPage(){
                             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
                             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><Link to="/support">Support Us</Link></li>
                             <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide ADS</Link></li>
-                            <li><FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /><Link to="/login">Sign In</Link></li>
+                            <li>
+                            {user ? (
+                                <div
+                                className="user-avatar-container"
+                                onClick={() => navigate("/profile")}
+                                >
+                                <img
+                                    src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                                    alt={user.username}
+                                    className="user-avatar-circle"
+                                />
+                                <span className="user-avatar-username">{user.username}</span>
+                                </div>
+                            ) : (
+                                <Link to="/login">
+                                    <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign In
+                                </Link>
+                            )}
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -137,14 +168,58 @@ function ContactPage(){
                     <div className="contact-detail-left">
                         <h2>Contact & Support</h2>
                         <p className="contact-subtext">Send us a message — we'll response as soon as possible.</p>
+                        <form
+                            className="contact-form"
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                if (!user) {
+                                alert("Please sign in before sending a message.");
+                                return;
+                                }
+                                if (!subject || !message) {
+                                alert("Please fill in both subject and message.");
+                                return;
+                                }
 
-                        <form className="contact-form">
+                                setIsSending(true);
+                                try {
+                                const res = await fetch("http://127.0.0.1:8000/api/contact", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                    user_email: user.email,
+                                    subject: `[${department}] ${subject}`,
+                                    message,
+                                    }),
+                                });
+                                const data = await res.json();
+
+                                if (data.status === "success") {
+                                    alert("Your message has been sent to support!");
+                                    setSubject("");
+                                    setMessage("");
+                                } else {
+                                    alert("Failed to send message. Try again later.");
+                                }
+                                } catch (err) {
+                                console.error("Error sending message:", err);
+                                alert("Error sending message. Please check your connection.");
+                                } finally {
+                                setIsSending(false);
+                                }
+                            }}
+                            >
                             <div className="contact-form-group">
                                 <label htmlFor="department">Department</label>
-                                <select id="department" name="department">
-                                    <option>General Support</option>
-                                    <option>Technical Support</option>
-                                    <option>Billing</option>
+                                <select
+                                id="department"
+                                name="department"
+                                value={department}
+                                onChange={(e) => setDepartment(e.target.value)}
+                                >
+                                <option>General Support</option>
+                                <option>Technical Support</option>
+                                <option>Billing</option>
                                 </select>
                             </div>
 
@@ -154,6 +229,8 @@ function ContactPage(){
                                 id="subject"
                                 type="text"
                                 placeholder="How can we help?"
+                                value={subject}
+                                onChange={(e) => setSubject(e.target.value)}
                                 />
                             </div>
 
@@ -163,6 +240,8 @@ function ContactPage(){
                                 id="message"
                                 rows="6"
                                 placeholder="Type your message here..."
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
                                 ></textarea>
                             </div>
 
@@ -170,8 +249,8 @@ function ContactPage(){
                                 Please keep your message clear. Basic formatting is supported.
                             </p>
 
-                            <button type="submit" className="contact-send-btn">
-                                Send message
+                            <button type="submit" className="contact-send-btn" disabled={isSending}>
+                                {isSending ? "Sending..." : "Send message"}
                             </button>
                         </form>
                     </div>
@@ -188,10 +267,15 @@ function ContactPage(){
 
                         <div className="contact-other-ways">
                             <h3>Other ways to reach us</h3>
-                            <button>Telegram</button>
-                            <button>Facebook</button>
-                            <button>YouTube</button>
-                            <button>Instagram</button>
+                            <button onClick={() => window.open("https://t.me/KIMEANG HORN", "_blank")}>
+                                <FontAwesomeIcon icon={faTelegram} /> Telegram
+                            </button>
+                            <button onClick={() => window.open("https://www.facebook.com/EangDev", "_blank")}>
+                                < FontAwesomeIcon icon={faFacebook} /> Facebook
+                            </button>
+                            <button onClick={() => window.open("https://www.youtube.com/@eang3301", "_blank")} className="youtube">
+                                <FontAwesomeIcon icon={faYoutube} /> YouTube
+                            </button>
                         </div>
 
                         <div className="contact-public-email">

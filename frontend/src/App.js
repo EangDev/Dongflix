@@ -6,6 +6,9 @@ import AboutPage from "./Components/AboutPage";
 import ContactPage from "./Components/ContactPage";
 import SupportPage from "./Components/SupportPage";
 import LoginPage from "./Components/LoginPage";
+import Profile from "./Components/Profile";
+import Editprofile from "./Components/Editprofile";
+import HidePage from "./Components/HidePage";
 
 function App(){
   return(
@@ -17,6 +20,9 @@ function App(){
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/edit-profile" element={<Editprofile/>} />
+        <Route path="/hide" element={<HidePage />} />
       </Routes>
     </Router>
   )
