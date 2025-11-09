@@ -124,7 +124,7 @@ function AboutPage() {
                         <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg" /><Link to="/about">About</Link></li>
                         <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
                         <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><Link to="/support">Support Us</Link></li>
-                        <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide Ads</Link></li>
+                        <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Bookmark</Link></li>
                         <li>
                           {user ? (
                             <div
@@ -132,7 +132,7 @@ function AboutPage() {
                               onClick={() => navigate("/profile")}
                             >
                               <img
-                                src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                                src={user.avatar || defaultAvatar}
                                 alt={user.username}
                                 className="user-avatar-circle"
                               />

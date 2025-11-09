@@ -15,6 +15,18 @@ import logo from "../Assets/mylogo.png";
 import FooterDonghuaPage from "./FooterPage";
 import loadingImg from "../Assets/loading.gif";
 import defaultAvatar from "../Assets/avatar/A1.png";
+import A1 from "../Assets/avatar/A1.png";
+import A2 from "../Assets/avatar/A2.png";
+import A3 from "../Assets/avatar/A3.png";
+import A4 from "../Assets/avatar/A4.png";
+import A5 from "../Assets/avatar/A5.png";
+import A6 from "../Assets/avatar/A6.png";
+import A7 from "../Assets/avatar/A7.png";
+import A8 from "../Assets/avatar/A8.png";
+import A9 from "../Assets/avatar/A9.png";
+
+const avatarList = [A1, A2, A3, A4, A5, A6, A7, A8, A9];
+
 
 function Editprofile() {
   const navigate = useNavigate();
@@ -154,7 +166,7 @@ function Editprofile() {
               </li>
               <li>
                 <FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" />
-                <Link to="/hide">Hide ADS</Link>
+                <Link to="/hide">Bookmark</Link>
               </li>
               <li>
                 {user ? (
@@ -214,54 +226,72 @@ function Editprofile() {
         {/* Upload Custom Avatar */}
         <div className="upload-avatar">
             <input
-            type="file"
-            id="avatar-upload"
-            accept="image/*"
-            onChange={(e) => {
+              type="file"
+              id="avatar-upload"
+              accept="image/*"
+              onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
+                  const reader = new FileReader();
+                  reader.onload = async () => {
                     const updatedUser = { ...user, avatar: reader.result };
                     setUser(updatedUser);
                     localStorage.setItem("user", JSON.stringify(updatedUser));
-                };
-                reader.readAsDataURL(file);
+
+                    // Call backend to save avatar
+                    try {
+                      await fetch("http://127.0.0.1:8000/api/update_avatar", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          user_id: user.user_id,
+                          avatar: reader.result
+                        }),
+                      });
+                    } catch (err) {
+                      console.error("Failed to update avatar in DB:", err);
+                    }
+                  };
+                  reader.readAsDataURL(file);
                 }
-            }}
+              }}
             />
         </div>
 
         {/* Avatar Grid */}
         {showAvatarGrid && (
-            <div className="avatar-grid">
-            {["A1.png", "A2.png", "A3.png", "A4.png", "A5.png"].map(
-                (avatarName, index) => {
-                const avatarPath = require(`../Assets/avatar/${avatarName}`);
-                return (
-                    <div
-                    key={index}
-                    className="avatar-item"
-                    onClick={() => {
-                        const updatedUser = { ...user, avatar: avatarPath };
-                        setUser(updatedUser);
-                        localStorage.setItem("user", JSON.stringify(updatedUser));
-                        setShowAvatarGrid(false);
-                    }}
-                    >
-                    <img
-                        src={avatarPath}
-                        alt={avatarName}
-                        className="avatar-img"
-                    />
-                    </div>
-                );
-                }
-            )}
-            </div>
+          <div className="avatar-grid">
+            {avatarList.map((avatarPath, index) => (
+              <div
+                key={index}
+                className="avatar-item"
+                onClick={() => {
+                  const updatedUser = { ...user, avatar: avatarPath };
+                  localStorage.setItem("user", JSON.stringify(updatedUser));
+                  setUser(updatedUser);
+
+                  (async () => {
+                    try {
+                      await fetch("http://127.0.0.1:8000/api/update_avatar", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          user_id: user.user_id,
+                          avatar: avatarPath,
+                        }),
+                      });
+                    } catch (err) {
+                      console.error("Failed to update avatar in DB:", err);
+                    }
+                  })();
+                }}
+              >
+                <img src={avatarPath} alt={`Avatar ${index}`} className="avatar-img" />
+              </div>
+            ))}
+          </div>
         )}
         </div>
-
       <footer>
         <FooterDonghuaPage />
       </footer>

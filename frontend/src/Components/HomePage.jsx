@@ -4,11 +4,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faMagnifyingGlass, faHouse, faHeart, faBookOpen, faEnvelope, faTelevision } from "@fortawesome/free-solid-svg-icons";
 import './style/HomePageStyle.css';
 import logo from '../Assets/mylogo.png';
+
+// COMPONENT
 import BannerPage from '../Components/BannerPage';
 import LatestDonghuaPage from './LatestPage';
 import PopularDonghuaPage from '../Components/PopularPage';
 import CompleteDonghuaPage from '../Components/CompletePage';
 import FooterDonghuaPage from '../Components/FooterPage';
+import RecentlyPage from "../Components/RecentlyPage";
+
 import loadingImg from '../Assets/loading.gif';
 import defaultAvatar from '../Assets/avatar/A1.png';
 
@@ -121,7 +125,7 @@ function HomePage() {
             <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg"/><Link to="/about">About</Link></li>
             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/><Link to="/contact">Comtact</Link></li>
             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg"/><Link to="/support">Support Us</Link></li>
-            <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><Link to="/hide">Hide ADS</Link></li>
+            <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><Link to="/hide">Bookmark</Link></li>
             <li>
               {user ? (
                 <div
@@ -129,7 +133,7 @@ function HomePage() {
                   onClick={() => navigate("/profile")}
                 >
                   <img
-                    src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                    src={user.avatar || defaultAvatar}
                     alt={user.username}
                     className="user-avatar-circle"
                   />
@@ -159,6 +163,7 @@ function HomePage() {
 
       <div className="homepage-container-3">
         <div className="homepage-donghua-body-section">
+          <RecentlyPage data={allDonghua} />
           <PopularDonghuaPage data={allDonghua} />
           <LatestDonghuaPage data={allDonghua} />
           <CompleteDonghuaPage data={allDonghua} />

@@ -123,8 +123,8 @@ function SupportPage(){
                             <li><FontAwesomeIcon icon={faHouse} color="#ccc" size="lg" /><Link to="/">Home</Link></li>
                             <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg" /><Link to="/about">About</Link></li>
                             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg" /><Link to="/contact">Contact</Link></li>
-                            <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><a href="/support">Support Us</a></li>
-                            <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Hide ADS</Link></li>
+                            <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg" /><Link to="/support">Support Us</Link></li>
+                            <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg" /><Link to="/hide">Bookmark</Link></li>
                             <li>
                             {user ? (
                                 <div
@@ -132,7 +132,7 @@ function SupportPage(){
                                     onClick={() => navigate("/profile")}
                                 >
                                 <img
-                                    src={defaultAvatar || "/default-user.png"} // fallback if no avatar
+                                    src={user.avatar || defaultAvatar}
                                     alt={user.username}
                                     className="user-avatar-circle"
                                 />

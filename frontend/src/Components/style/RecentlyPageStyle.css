@@ -1,0 +1,210 @@
+:root {
+  --bg-mainBG: #000;
+  --bg-headerBG: #131313;
+  --bg-hoverBG: #0095c2;
+  --bg-activeBG: #00c3ff;
+  --bg-sliceBG: #bbefff;
+  --txt-color: #ccc;
+}
+
+@font-face {
+  font-family: 'Rolam';
+  src: url(../../Assets/fonts/ROLAM-PersonalUse.otf);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+/* --- Global Styles --- */
+body {
+  margin: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-mainBG);
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+}
+
+/* --- Loading Overlay --- */
+.loading {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 195, 255, 0.2); /* semi-transparent bluish tint */
+  backdrop-filter: blur(4px); /* adds subtle blur to the background */
+  -webkit-backdrop-filter: blur(4px); /* Safari support */
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+.loading img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  animation: spin 1.5s linear infinite; /* optional spinning effect */
+}
+
+.loading-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #00c3ff; /* bright color for visibility */
+  margin-top: 15px;
+  text-align: center;
+}
+
+/* Optional: spinning animation for logo */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Recently Page Container --- */
+.recently-dong-section {
+  margin-top: 50px;
+  background-color: var(--bg-mainBG);
+}
+
+.recently-dong-section .recently-dong-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 20px;
+  margin-bottom: 35px;
+}
+
+.recently-dong-section 
+.recently-dong-header 
+.recently-dong-link ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recently-dong-section 
+.recently-dong-header 
+.recently-dong-link a {
+  text-decoration: none;
+  color: var(--txt-color);
+  font-weight: bold;
+  font-size: 20px;
+  font-family: 'Rolam', sans-serif;
+}
+
+.recently-dong-section 
+.recently-dong-header 
+.recently-dong-link span {
+  list-style-type: none;
+  background-color: var(--bg-sliceBG);
+  color: var(--bg-mainBG);
+  padding: 6px 10px;
+  border-radius: 20px 5px;
+}
+
+/* --- Body --- */
+.recently-dong-body {
+  width: 90%;
+  margin: 0 auto;
+  display: block;
+  background-color: rgba(110, 110, 110, 0.1);
+  padding: 40px 0px;
+  border-radius: 10px;
+}
+
+.recently-dong-body .recently-banner-grid {
+  display: flex;              
+  gap: 20px;                 
+  overflow-x: auto;          
+  overflow-y: hidden;         
+  padding: 20px 60px;
+  scroll-behavior: smooth;   
+  -webkit-overflow-scrolling: touch;
+}
+
+.recently-dong-body .recently-banner-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.recently-dong-body .recently-banner-grid::-webkit-scrollbar-thumb {
+  background-color: var(--bg-activeBG);
+  border-radius: 4px;
+}
+
+.recently-dong-body .recently-banner-grid::-webkit-scrollbar-track {
+  background-color: rgba(0,0,0,0.2);
+}
+
+.recently-item {
+  flex: 0 0 200px; 
+}
+
+.recently-item-image {
+  position: relative;
+  width: 200px;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #111;
+}
+
+.recently-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.recently-item:hover img {
+  opacity: 0.5;
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.recently-item-image .play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 50px;
+  color: #00c3ff;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.recently-item:hover 
+.play-icon {
+  opacity: 1;
+}
+
+.recently-item-title {
+  margin-top: 8px;
+  font-size: 14px;
+  text-align: center;
+  width: 200px;
+  color: var(--txt-color);
+  font-family: 'Space Mono', sans-serif;
+  transition: color 0.3s ease;
+}
+
+.recently-item:hover 
+.recently-item-title {
+  color: var(--bg-activeBG);
+}
+
+.episode_number{
+    font-weight: bold;
+    color: var(--bg-hoverBG);
+}
+
+/* --- No Recently Watched Text --- */
+.no-recently {
+  color: #888;
+  font-size: 16px;
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 40px 0;
+}

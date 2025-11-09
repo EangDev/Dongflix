@@ -353,39 +353,151 @@ body {
 
 .profile-favorites,
 .profile-recently-watched {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  max-height: 250px;
+  overflow-y: auto; 
+  padding-right: 10px;
+  scroll-behavior: smooth;
 }
 
-.profile-favorite-item,
-.profile-recent-item {
-    width: 100px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-    text-align: center;
+/* --- Optional: Style the scrollbar (Webkit browsers) --- */
+.profile-favorites::-webkit-scrollbar,
+.profile-recently-watched::-webkit-scrollbar {
+  width: 8px;
 }
 
-.profile-favorite-item img,
-.profile-recent-item img {
-    width: 100px;
-    height: 140px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid #00c3ff;
+.profile-favorites::-webkit-scrollbar-track,
+.profile-recently-watched::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 10px;
 }
 
-.profile-favorite-item span,
-.profile-recent-item span {
-    display: block;
-    font-size: 12px;
-    color: var(--txt-color);
-    margin-top: 5px;
+.profile-favorites::-webkit-scrollbar-thumb,
+.profile-recently-watched::-webkit-scrollbar-thumb {
+  background-color: var(--bg-activeBG);
+  border-radius: 10px;
 }
 
-.profile-favorite-item:hover,
-.profile-recent-item:hover {
+.profile-favorite-item {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 6px;
+  min-height: 220px;
+  position: relative;
+}
+
+.profile-favorite-item img {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #00c3ff;
+}
+
+.profile-favorite-item span {
+  display: block;
+  font-size: 12px;
+  color: var(--txt-color);
+  text-align: center;
+  margin-top: 10px;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.profile-favorite-item .watch-btn {
+  position: absolute;
+  bottom: 5px;
+  width: 80%;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  font-family: 'Space Mono' monospace;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* subtle hover scale only */
+.profile-favorite-item .watch-btn:hover {
+  background-color: var(--bg-activeBG);
+  font-family: 'Space Mono' monospace;
+}
+
+.profile-favorite-item button.watch-btn:hover {
+    background-color: var(--bg-activeBG);
     transform: scale(1.05);
 }
 
+.profile-recent-item {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 6px;
+  min-height: 220px;
+  position: relative;
+}
+
+.profile-recent-item img {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #00c3ff;
+}
+
+.profile-recent-item span {
+  display: block;
+  font-size: 12px;
+  color: var(--txt-color);
+  text-align: center;
+  margin-top: 10px;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.profile-recent-item .watch-btn {
+  position: absolute;
+  bottom: 5px;
+  width: 80%;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--bg-hoverBG);
+  color: #fff;
+  font-family: 'Space Mono' monospace;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* subtle hover scale only */
+.profile-recent-item .watch-btn:hover {
+  background-color: var(--bg-activeBG);
+  font-family: 'Space Mono' monospace;
+}
+
+.profile-recent-item button.watch-btn:hover {
+    background-color: var(--bg-activeBG);
+    transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .profile-favorite-item button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
 

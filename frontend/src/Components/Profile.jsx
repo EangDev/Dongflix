@@ -15,33 +15,41 @@ function Profile(){
     const [filteredDonghua, setFilteredDonghua] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showSuggestions, setShowSuggestions] = useState(false);
-
-    const getCleanTitle = (title) => {
-        if (!title) return "";
-        return title.split("-")[0].trim();
-    };
-
-    const [bookmarks, setBookmarks] = useState(() => {
-        const saved = localStorage.getItem("bookmarks");
-        return saved ? JSON.parse(saved) : [];
-    });
-
+    
     const [user, setUser] = useState(() => {
         const savedUser = localStorage.getItem("user");
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
-    const [recentlyWatched, setRecentlyWatched] = useState(() => {
-        const saved = localStorage.getItem("recentlyWatched");
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [bookmarks, setBookmarks] = useState([]);
+    
+    const getCleanTitle = (title) => {
+        if (!title) return "";
+        return title.replace(/Episode\s*\d+/i, "").trim();
+    };
 
-    // Optional: refresh when profile mounts
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        setUser(null);
+        setBookmarks([]);
+        navigate("/login");
+    };
+
+     // Fetch bookmarks from backend
     useEffect(() => {
-        const saved = localStorage.getItem("recentlyWatched");
-        if (saved) setRecentlyWatched(JSON.parse(saved));
-    }, []);
+        if (!user) return;
 
+        const fetchBookmarks = async () => {
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/bookmarks/${user.user_id}`);
+                const data = await res.json();
+                setBookmarks(data);
+            } catch (err) {
+                console.error("Failed to fetch bookmarks:", err);
+            }
+        };
+        fetchBookmarks();
+    }, [user]);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -59,6 +67,7 @@ function Profile(){
         fetchAll();
     }, []);
     
+    // Search filter
     useEffect(() => {
         if (!searchQuery) {
             setFilteredDonghua([]);
@@ -70,16 +79,21 @@ function Profile(){
             item.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
             item.link
         );
-        
         setFilteredDonghua(results);
         setShowSuggestions(results.length > 0);
     }, [searchQuery, allDonghua]);
-        
-    const handleSelectAnime = (item) => {
+
+   const handleSelectAnime = (item) => {
         if (!item.link) return;
         navigate(`/watch?url=${encodeURIComponent(item.link)}&image=${encodeURIComponent(item.image || item.thumbnail)}`);
         setSearchQuery("");
         setShowSuggestions(false);
+
+        if (!bookmarks.some(b => b.link === item.link)) {
+            const updatedBookmarks = [...bookmarks, item];
+            setBookmarks(updatedBookmarks);
+            localStorage.setItem("bookmarks", JSON.stringify(updatedBookmarks));
+        }
     };
 
     if (loading) return (
@@ -91,7 +105,7 @@ function Profile(){
 
     return(
         <>
-                <header>
+            <header>
                 <div className="profile-header-container">
                     <div className="profile-logo-img">
                         <Link to="/"><img src={logo} alt="logo" /></Link>
@@ -125,7 +139,7 @@ function Profile(){
                                 alt={item.title}
                                 className="profile-suggestion-img"
                                 />
-                            </div>
+                            </div> 
                             <span>{item.title}</span>
                             </div>
                         ))}
@@ -139,7 +153,7 @@ function Profile(){
                             <li><FontAwesomeIcon icon={faBookOpen} color="#ccc" size="lg"/><Link to="/about">About</Link></li>
                             <li><FontAwesomeIcon icon={faEnvelope} color="#ccc" size="lg"/><Link to="/contact">Comtact</Link></li>
                             <li><FontAwesomeIcon icon={faHeart} color="#ccc" size="lg"/><Link to="/support">Support Us</Link></li>
-                            <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><Link to="/hide">Hide ADS</Link></li>
+                            <li><FontAwesomeIcon icon={faTelevision} color="#ccc" size="lg"/><Link to="/hide">Bookmark</Link></li>
                             <li>
                             {user ? (
                                 <div
@@ -147,12 +161,12 @@ function Profile(){
                                 onClick={() => navigate("/profile")}
                                 >
                                 <img
-                                    src={defaultAvatar || "/default-user.png"} // fallback if no avatar
-                                    alt={user.username}
+                                    src={user?.avatar || defaultAvatar}
+                                    alt={user?.username || "Guest"}
                                     className="user-avatar-circle"
                                 />
                                 <span className="user-avatar-username">{user.username}</span>
-                                </div>
+                                </div> 
                             ) : (
                                 <Link to="/login">
                                 <FontAwesomeIcon icon={faUser} color="#ccc" size="lg" /> Sign In
@@ -172,9 +186,9 @@ function Profile(){
                 </div>
                 <div className="profile-container-2">
                     <div className="profile-avatar-section">
-                        <img 
-                            src={defaultAvatar} 
-                            alt={user?.username || "User"} 
+                        <img
+                            src={user?.avatar || defaultAvatar}
+                            alt={user?.username || "Guest"}
                             className="profile-avatar-img"
                         />
                         <h2 className="profile-username">{user?.username || "Guest"}</h2>
@@ -184,65 +198,26 @@ function Profile(){
                             onClick={() => navigate("/edit-profile")}
                         >
                             Edit Profile
-                        </button>
+                        </button> 
                         <button
                             className="profile-logout-btn"
-                            onClick={() => {
-                                localStorage.removeItem("user");
-                                setUser(null);
-                                navigate("/login");
-                            }}
-                            >
+                            onClick={handleLogout}
+                        >
                             Log Out
                         </button>
                     </div>
 
                     <div className="profile-info-section">
                         <div className="profile-section">
-                            <h3>Bookmark</h3>
+                            <h3>Bookmarks</h3>
                             <div className="profile-favorites">
-                                {bookmarks.length > 0 ? (
-                                bookmarks.map((item, index) => (
-                                    <div 
-                                    key={index} 
-                                    className="profile-favorite-item"
-                                    onClick={() => handleSelectAnime(item)}
-                                    >
-                                    <img 
-                                        src={item.image || item.thumbnail} 
-                                        alt={item.title} 
-                                        className="profile-favorite-img"
-                                    />
-                                    <span>{getCleanTitle(item.title)}</span>
+                                {bookmarks.length > 0 ? bookmarks.map((item, index) => (
+                                    <div key={index} className="profile-favorite-item">
+                                        <img src={item.image || item.thumbnail} alt={item.title} className="profile-favorite-img"/>
+                                        <span>{getCleanTitle(item.title)}</span>
+                                        <button className="watch-btn" onClick={() => handleSelectAnime(item)}>Watch</button>
                                     </div>
-                                ))
-                                ) : (
-                                    <p>No bookmarks yet</p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="profile-section">
-                            <h3>Recently Watched</h3>
-                            <div className="profile-recently-watched">
-                                {recentlyWatched.length > 0 ? (
-                                    recentlyWatched.map((item, index) => (
-                                        <div 
-                                            key={index} 
-                                            className="profile-recent-item"
-                                            onClick={() => handleSelectAnime(item)}
-                                        >
-                                            <img 
-                                                src={item.image || item.thumbnail} 
-                                                alt={item.title} 
-                                                className="profile-recent-img"
-                                            />
-                                            <span>{getCleanTitle(item.title)}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>No recently watched yet</p>
-                                )}
+                                )) : <p>No bookmarks yet</p>}
                             </div>
                         </div>
                     </div>

@@ -20,6 +20,11 @@ function LoginPage(){
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeTab, setActiveTab] = useState("login");
 
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+
     useEffect(() => {
         const fetchAll = async () => {
           try {
@@ -67,12 +72,6 @@ function LoginPage(){
     const [signupName, setSignupName] = useState("");
     const [signupEmail, setSignupEmail] = useState("");
     const [signupPassword, setSignupPassword] = useState("");
-
-    // User state
-    const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem("user");
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -163,7 +162,7 @@ function LoginPage(){
             alert("Unable to connect to server.");
         }
     };
-
+    
     if (loading) {
         return (
             <div className="loading">

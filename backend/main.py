@@ -1,18 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-import os
-from urllib.parse import urlparse
-import re
-import base64
-import time
-import pyodbc
+from urllib.parse import urlparse, unquote
+import time, pyodbc, smtplib, base64, re, os, requests
 from pydantic import BaseModel
-import smtplib
 from email.mime.text import MIMEText
-from datetime import datetime, timedelta
+from typing import List, Optional
 
 # ------------------- CACHES -------------------
 CACHE = {"data": [], "timestamp": 0}
@@ -63,48 +57,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class PremiumPurchase(BaseModel):
-    user_id: int
-    duration: str
-    price: float
-    payment_method: str
-
-@app.post("/api/user/premium")
-def activate_premium(data: PremiumPurchase):
-    now = datetime.now()
-
-    # Duration mapping
-    if data.duration == "1-Month":
-        end_date = now + timedelta(days=30)
-    elif data.duration == "3-Month":
-        end_date = now + timedelta(days=90)
-    elif data.duration == "Lifetime":
-        end_date = None
-    else:
-        raise HTTPException(status_code=400, detail="Invalid duration")
-
-    try:
-        cursor.execute("""
-            UPDATE tb_signup
-            SET hasPremium = 1,
-                premiumType = ?,
-                paymentMethod = ?,
-                premiumStart = ?,
-                premiumEnd = ?,
-                ads = 1  -- ✅ Fixed: use BIT 1 instead of 'Hidden'
-            WHERE id = ?
-        """, data.duration, data.payment_method, now, end_date, data.user_id)
-        conn.commit()
-
-        return {
-            "status": "success",
-            "message": "✅ Premium activated successfully! Ads are now hidden."
-        }
-
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
 class ContactMessage(BaseModel):
     user_email: str
     subject: str
@@ -150,6 +102,26 @@ def contact_support(data: ContactMessage):
     else:
         raise HTTPException(status_code=500, detail="Failed to send message.")
 
+class UpdateAvatar(BaseModel):
+    user_id: int
+    avatar: str 
+
+@app.post("/api/update_avatar")
+def update_avatar(data: UpdateAvatar):
+    if not data.user_id or not data.avatar:
+        raise HTTPException(status_code=400, detail="Missing user_id or avatar")
+
+    try:
+        cursor.execute(
+            "UPDATE tb_signup SET avatar = ? WHERE id = ?",
+            data.avatar, data.user_id
+        )
+        conn.commit()
+        return {"status": "success", "message": "Avatar updated successfully"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update avatar: {str(e)}")
+
 class Signup(BaseModel):
     username: str
     email: str
@@ -174,7 +146,7 @@ def signup(data: Signup):
 @app.post("/api/login")
 def login(data: Login):
     cursor.execute(
-        "SELECT id, username, email, ads FROM tb_signup WHERE email = ? AND password = ?",
+        "SELECT id, username, email, ads, avatar FROM tb_signup WHERE email = ? AND password = ?",
         data.email, data.password,
     )
     user = cursor.fetchone()
@@ -185,9 +157,76 @@ def login(data: Login):
             "username": user[1],
             "email" : user[2],
             "ads": bool(user[3]),
+            "avatar": user[4] or ""
         }
     else:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+# Request model for adding recently watched
+class RecentlyWatchedItem(BaseModel):
+    user_id: int
+    title: str
+    link: str
+    image: str = None
+    episode_number: str
+
+# Add watched episode
+@app.post("/api/recently-watched/add")
+def add_recently_watched(item: RecentlyWatchedItem):
+    try:
+        cursor.execute("""
+            INSERT INTO tb_recently_watched (user_id, title, link, image, episode_number)
+            VALUES (?, ?, ?, ?, ?)
+        """, item.user_id, item.title, item.link, item.image, item.episode_number)
+        conn.commit()
+        return {"status": "success", "message": "Recently watched added"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to add recently watched: {str(e)}")
+
+# Get recently watched for a user (most recent first)
+@app.get("/api/recently-watched/{user_id}")
+def get_recently_watched(user_id: int):
+    cursor.execute("""
+        SELECT title, link, image, episode_number, watched_at
+        FROM tb_recently_watched
+        WHERE user_id = ?
+        ORDER BY watched_at DESC
+    """, user_id)
+    rows = cursor.fetchall()
+    result = [
+        {"title": r[0], "link": r[1], "image": r[2], "episode_number": r[3], "watched_at": r[4]}
+        for r in rows
+    ]
+    return {"count": len(result), "data": result}
+
+#--------------- BOOKMARK -----------------------------
+class Bookmark(BaseModel):
+    user_id: int
+    title: str
+    link: str
+    image: Optional[str] = None
+
+@app.get("/api/bookmarks/{user_id}")
+def get_bookmarks(user_id: int):
+    cursor.execute("SELECT title, link, image FROM tb_bookmarks WHERE user_id = ?", user_id)
+    rows = cursor.fetchall()
+    return [{"title": r[0], "link": r[1], "image": r[2]} for r in rows]
+
+@app.post("/api/bookmarks/add")
+def add_bookmark(data: Bookmark):
+    cursor.execute("""
+        INSERT INTO tb_bookmarks (user_id, title, link, image)
+        VALUES (?, ?, ?, ?)
+    """, data.user_id, data.title, data.link, data.image)
+    conn.commit()
+    return {"status": "success", "message": "Bookmark added"}
+
+@app.delete("/api/bookmarks/remove")
+def remove_bookmark(user_id: int, link: str):
+    cursor.execute("DELETE FROM tb_bookmarks WHERE user_id = ? AND link = ?", user_id, link)
+    conn.commit()
+    return {"status": "success", "message": "Bookmark removed"}
 
 # ------------------- LATEST -------------------
 @app.get("/lucifer")
