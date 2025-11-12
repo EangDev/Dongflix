@@ -7,6 +7,7 @@ import time, pyodbc, smtplib, base64, re, os, requests
 from pydantic import BaseModel
 from email.mime.text import MIMEText
 from typing import List, Optional
+from datetime import datetime
 
 # ------------------- CACHES -------------------
 CACHE = {"data": [], "timestamp": 0}
@@ -27,15 +28,16 @@ USER_AGENT = os.getenv("USER_AGENT")
 DB_SERVER = os.getenv("DB_SERVER")
 DB_NAME = os.getenv("DB_NAME")
 
-conn = pyodbc.connect(
-    f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-    f"SERVER={DB_SERVER};"
-    f"DATABASE={DB_NAME};"
-    f"Trusted_Connection=yes;"
-    f";Encrypt=no;"
-)
-
-cursor = conn.cursor()
+def get_db_connection():
+    conn_str = (
+        f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+        f"SERVER={DB_SERVER};"
+        f"DATABASE={DB_NAME};"
+        f"Trusted_Connection=yes;"
+        f";Encrypt=no;"
+    )
+    # autocommit True reduces transaction lock issues for simple inserts/selects
+    return pyodbc.connect(conn_str, autocommit=True, timeout=5)
 
 # Validate URL
 if not LUCIFER_URL or not urlparse(LUCIFER_URL).scheme:
@@ -87,8 +89,10 @@ def send_email(subject: str, body: str, from_email: str):
 @app.post("/api/contact")
 def contact_support(data: ContactMessage):
     # Check if user exists
-    cursor.execute("SELECT username FROM tb_signup WHERE email = ?", data.user_email)
-    user = cursor.fetchone()
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT username FROM tb_signup WHERE email = ?", (data.user_email,))
+        user = cur.fetchone()
 
     if not user:
         raise HTTPException(status_code=404, detail="User email not found")
@@ -112,14 +116,14 @@ def update_avatar(data: UpdateAvatar):
         raise HTTPException(status_code=400, detail="Missing user_id or avatar")
 
     try:
-        cursor.execute(
-            "UPDATE tb_signup SET avatar = ? WHERE id = ?",
-            data.avatar, data.user_id
-        )
-        conn.commit()
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "UPDATE tb_signup SET avatar = ? WHERE id = ?",
+                (data.avatar, data.user_id)
+            )
         return {"status": "success", "message": "Avatar updated successfully"}
-    except Exception as e:
-        conn.rollback()
+    except pyodbc.Error as e:
         raise HTTPException(status_code=500, detail=f"Failed to update avatar: {str(e)}")
 
 class Signup(BaseModel):
@@ -134,22 +138,26 @@ class Login(BaseModel):
 @app.post("/api/signup")
 def signup(data: Signup):
     try:
-        cursor.execute(
-            "INSERT INTO tb_signup (username, email, password) VALUES (?, ?, ?)",
-            data.username, data.email, data.password
-        )
-        conn.commit()
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO tb_signup (username, email, password) VALUES (?, ?, ?)",
+                (data.username, data.email, data.password)
+            )
         return {"status": "success", "message": "User signed up!"}
     except pyodbc.IntegrityError:
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
 @app.post("/api/login")
 def login(data: Login):
-    cursor.execute(
-        "SELECT id, username, email, ads, avatar FROM tb_signup WHERE email = ? AND password = ?",
-        data.email, data.password,
-    )
-    user = cursor.fetchone()
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, username, email, ads, avatar FROM tb_signup WHERE email = ? AND password = ?",
+            (data.email, data.password)
+        )
+        user = cur.fetchone()
+
     if user:
         return {
             "status": "success",
@@ -171,34 +179,81 @@ class RecentlyWatchedItem(BaseModel):
     episode_number: str
 
 # Add watched episode
+from datetime import datetime
+
 @app.post("/api/recently-watched/add")
 def add_recently_watched(item: RecentlyWatchedItem):
     try:
-        cursor.execute("""
-            INSERT INTO tb_recently_watched (user_id, title, link, image, episode_number)
-            VALUES (?, ?, ?, ?, ?)
-        """, item.user_id, item.title, item.link, item.image, item.episode_number)
-        conn.commit()
-        return {"status": "success", "message": "Recently watched added"}
+        watched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            # Optionally delete old record for (user_id + title) to keep only latest
+            cur.execute(
+                "DELETE FROM tb_recently_watched WHERE user_id = ? AND title = ?",
+                (item.user_id, item.title)
+            )
+
+            cur.execute(
+                """
+                INSERT INTO tb_recently_watched (user_id, title, link, image, episode_number, watched_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (item.user_id, item.title, item.link, item.image, item.episode_number, watched_at)
+            )
+            # Because autocommit=True when connecting, explicit conn.commit() is not required,
+            # but you can call conn.commit() if you prefer.
+        return {"status": "success", "message": "Recently watched updated"}
+    except pyodbc.Error as db_err:
+        # Log the error on the server for debugging
+        print("DB error in add_recently_watched:", db_err)
+        raise HTTPException(status_code=500, detail="Database error when adding recently watched")
     except Exception as e:
-        conn.rollback()
+        print("Unexpected error in add_recently_watched:", e)
         raise HTTPException(status_code=500, detail=f"Failed to add recently watched: {str(e)}")
 
 # Get recently watched for a user (most recent first)
 @app.get("/api/recently-watched/{user_id}")
 def get_recently_watched(user_id: int):
-    cursor.execute("""
-        SELECT title, link, image, episode_number, watched_at
-        FROM tb_recently_watched
-        WHERE user_id = ?
-        ORDER BY watched_at DESC
-    """, user_id)
-    rows = cursor.fetchall()
-    result = [
-        {"title": r[0], "link": r[1], "image": r[2], "episode_number": r[3], "watched_at": r[4]}
-        for r in rows
-    ]
-    return {"count": len(result), "data": result}
+    try:
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            
+            # Deduplicate by title and get only the latest watched episode
+            cur.execute("""
+                WITH ranked AS (
+                    SELECT *,
+                           ROW_NUMBER() OVER(PARTITION BY title ORDER BY watched_at DESC, 
+                                              CAST(ISNULL(episode_number, '0') AS INT) DESC) AS rn
+                    FROM tb_recently_watched
+                    WHERE user_id = ?
+                )
+                SELECT user_id, title, link, image, episode_number, watched_at
+                FROM ranked
+                WHERE rn = 1
+                ORDER BY watched_at DESC
+            """, (user_id,))
+            
+            rows = cur.fetchall()
+
+        result = [
+            {
+                "user_id": r[0],
+                "title": r[1],
+                "link": r[2],
+                "image": r[3],
+                "episode_number": r[4],
+                "watched_at": r[5].strftime("%Y-%m-%d %H:%M:%S") if hasattr(r[5], "strftime") else str(r[5])
+            }
+            for r in rows
+        ]
+        return {"count": len(result), "data": result}
+    
+    except pyodbc.Error as db_err:
+        print("DB error in get_recently_watched:", db_err)
+        raise HTTPException(status_code=500, detail="Database error when fetching recently watched")
+    except Exception as e:
+        print("Unexpected error in get_recently_watched:", e)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch recently watched: {str(e)}")
 
 #--------------- BOOKMARK -----------------------------
 class Bookmark(BaseModel):
@@ -209,24 +264,41 @@ class Bookmark(BaseModel):
 
 @app.get("/api/bookmarks/{user_id}")
 def get_bookmarks(user_id: int):
-    cursor.execute("SELECT title, link, image FROM tb_bookmarks WHERE user_id = ?", user_id)
-    rows = cursor.fetchall()
-    return [{"title": r[0], "link": r[1], "image": r[2]} for r in rows]
+    try:
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT title, link, image FROM tb_bookmarks WHERE user_id = ?", (user_id,))
+            rows = cur.fetchall()
+        return [{"title": r[0], "link": r[1], "image": r[2]} for r in rows]
+    except Exception as e:
+        print("Error fetching bookmarks:", e)
+        raise HTTPException(status_code=500, detail="Failed to fetch bookmarks")
 
 @app.post("/api/bookmarks/add")
 def add_bookmark(data: Bookmark):
-    cursor.execute("""
-        INSERT INTO tb_bookmarks (user_id, title, link, image)
-        VALUES (?, ?, ?, ?)
-    """, data.user_id, data.title, data.link, data.image)
-    conn.commit()
-    return {"status": "success", "message": "Bookmark added"}
+    try:
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO tb_bookmarks (user_id, title, link, image) VALUES (?, ?, ?, ?)",
+                (data.user_id, data.title, data.link, data.image)
+            )
+        return {"status": "success", "message": "Bookmark added"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add bookmark: {str(e)}")
 
 @app.delete("/api/bookmarks/remove")
 def remove_bookmark(user_id: int, link: str):
-    cursor.execute("DELETE FROM tb_bookmarks WHERE user_id = ? AND link = ?", user_id, link)
-    conn.commit()
-    return {"status": "success", "message": "Bookmark removed"}
+    try:
+        with get_db_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "DELETE FROM tb_bookmarks WHERE user_id = ? AND link = ?",
+                (user_id, link)
+            )
+        return {"status": "success", "message": "Bookmark removed"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to remove bookmark: {str(e)}")
 
 # ------------------- LATEST -------------------
 @app.get("/lucifer")

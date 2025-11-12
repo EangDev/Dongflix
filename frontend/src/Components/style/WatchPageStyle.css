@@ -375,6 +375,10 @@ body {
   transform: scale(1.05);
 }
 
+.episode-item.watched {
+  opacity: 1;
+}
+
 /* --- Header that tells user to login --- */
 .watch-comments-header {
   background-color: var(--bg-headerBG);

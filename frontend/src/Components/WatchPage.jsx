@@ -13,6 +13,7 @@ import loadingImg from '../Assets/loading.gif';
 import defaultAvatar from '../Assets/avatar/A1.png';
 
 function WatchPage() {
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialUrl = params.get("url");
   const initialImage = params.get("image");
@@ -24,7 +25,11 @@ function WatchPage() {
     image: initialImage || "",
     description: ""
   });
-
+  
+  const descriptionPreview = titleDetails.description?.slice(0, 200);
+  const fullDescription = titleDetails.description;
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  
   const [servers, setServers] = useState({});
   const [currentServer, setCurrentServer] = useState(null);
   const [episodes, setEpisodes] = useState([]);
@@ -32,77 +37,61 @@ function WatchPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  const [showFullDescription, setShowFullDescription] = useState(false);
-
   const EPISODES_PER_PAGE = 30;
-  const navigate = useNavigate();
 
-  const descriptionPreview = titleDetails.description?.slice(0, 200);
-  const fullDescription = titleDetails.description;
-  
   const [savedRecentlyWatched, setSavedRecentlyWatched] = useState(false);
 
-  const [clickedEpisodes, setClickedEpisodes] = useState(() => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = savedUser?.user_id || "guest";
-    const saved = localStorage.getItem(`watchedEpisodes_${userId}`);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [selectedEpisode, setSelectedEpisode] = useState(null);
 
   const handleEpisodeClick = async (ep) => {
-    if (!ep.url) return;
+  if (!ep.url) return;
 
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (!savedUser) {
-        alert("Please login to watch.");
-        navigate("/login");
-        return;
-    }
+  const savedUser = JSON.parse(localStorage.getItem("user"));
+  if (!savedUser) {
+    alert("Please login to watch.");
+    navigate("/login");
+    return;
+  }
 
-    const userId = savedUser.user_id;
+  const userId = savedUser.user_id;
 
-    // Update clicked episodes locally
-    if (!clickedEpisodes.includes(ep.number)) {
-      const updated = [...clickedEpisodes, ep.number];
-      setClickedEpisodes(updated);
-    }
+    //highlight only this episode
+    setSelectedEpisode(ep.number);
 
-    // Call API to store in DB
     try {
-        await fetch("http://127.0.0.1:8000/api/recently-watched/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                user_id: userId,
-                title: titleDetails.title,
-                link: initialUrl,
-                image: titleDetails.image,
-                episode_number: ep.number
-            }),
-        });
+      await fetch("http://127.0.0.1:8000/api/recently-watched/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          title: titleDetails.title,
+          link: initialUrl,
+          image: titleDetails.image,
+          episode_number: ep.number,
+        }),
+      });
     } catch (err) {
-        console.error("Failed to add recently watched:", err);
+      console.error("Failed to add recently watched:", err);
     }
 
-    // Check cache
+    // check cache / fetch video
     if (serverCache[ep.number]) {
-        setCurrentServer(serverCache[ep.number]);
-        navigate(`?url=${encodeURIComponent(ep.url)}`, { replace: true });
-        return;
+      setCurrentServer(serverCache[ep.number]);
+      navigate(`?url=${encodeURIComponent(ep.url)}`, { replace: true });
+      return;
     }
 
-    // Fetch new stream data
     try {
-        const res = await fetch(`http://127.0.0.1:8000/api/stream?url=${encodeURIComponent(ep.url)}`);
-        const data = await res.json();
-        if (data.servers) {
-            const firstServer = Object.values(data.servers)[0];
-            setCurrentServer(firstServer);
-            setServerCache(prev => ({ ...prev, [ep.number]: firstServer }));
-            navigate(`?url=${encodeURIComponent(ep.url)}`, { replace: true });
-        }
+      const res = await fetch(`http://127.0.0.1:8000/api/stream?url=${encodeURIComponent(ep.url)}`);
+      const data = await res.json();
+      if (data.servers) {
+        const firstServer = Object.values(data.servers)[0];
+        setCurrentServer(firstServer);
+        setServerCache(prev => ({ ...prev, [ep.number]: firstServer }));
+        navigate(`?url=${encodeURIComponent(ep.url)}`, { replace: true });
+      }
     } catch (err) {
-        console.error("Error fetching episode:", err);
+      console.error("Error fetching episode:", err);
     }
   };
 
@@ -227,13 +216,6 @@ function WatchPage() {
     saveRecentlyWatched();
   }, [titleDetails, initialUrl, savedRecentlyWatched]);
 
-  useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = savedUser?.user_id || "guest";
-    const saved = localStorage.getItem(`watchedEpisodes_${userId}`);
-    setClickedEpisodes(saved ? JSON.parse(saved) : []);
-  }, [user]);
-
   //BOOKMARK Effect
   useEffect(() => {
     if (!user) return;
@@ -296,6 +278,11 @@ function WatchPage() {
       })
       .catch(console.error);
   }, [initialUrl]);
+
+  useEffect(() => {
+    const currentEp = episodes.find(ep => initialUrl.includes(ep.url.split('/').pop()));
+    if (currentEp) setSelectedEpisode(currentEp.number);
+  }, [episodes, initialUrl]);
 
   // --- Filter and paginate episodes ---
   const filteredEpisodes = useMemo(() => {
@@ -451,7 +438,7 @@ function WatchPage() {
           <div className="episode-list">
             {displayedEpisodes.map((ep, index) => {
               if (!ep.url) return null;
-              const isActive = clickedEpisodes.includes(ep.number);
+              const isActive = selectedEpisode === ep.number;
               return (
                 <button
                   key={index}
